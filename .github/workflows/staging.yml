@@ -37,7 +37,7 @@ jobs:
     - name: Build
       run: |
         dotnet build --no-restore
-        dotnet publish ./BoardCutter.sln /p:PublishProfile=BoardCutter/Properties/PublishProfiles/FTPProfile.pubxml
+        dotnet publish ./BoardCutter.sln /p:PublishProfileFullPath=BoardCutter/Properties/PublishProfiles/FTPProfile.pubxml
         
     - name: Test
       run: dotnet test --no-build --verbosity normal
