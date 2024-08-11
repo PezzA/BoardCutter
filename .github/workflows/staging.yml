@@ -27,14 +27,14 @@ jobs:
     - name: Echo secrets
       run: |
         pwd
-        echo $STAGING_PUBLISH_FILE >> staging_publish.xml
-        cat staging_publish.xml
-        ls
+        echo $STAGING_PUBLISH_FILE >> BoardCutter/Properties/PublishProfiles/FTPProfile.pubxml
+        cat BoardCutter/Properties/PublishProfiles/FTPProfile.pubxml
+        ls BoardCutter/Properties/PublishProfiles
         
     - name: Build
       run: |
         dotnet build --no-restore
-        dotnet publish ./BoardCutter.sln /p:PublishProfile=staging_publish.xml
+        dotnet publish ./BoardCutter.sln /p:PublishProfile=BoardCutter/Properties/PublishProfiles/FTPProfile.pubxml
         
     - name: Test
       run: dotnet test --no-build --verbosity normal
