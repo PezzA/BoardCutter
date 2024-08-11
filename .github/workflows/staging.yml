@@ -24,6 +24,13 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore
 
+    - name: Build
+      run: |
+        dotnet build --no-restore
+
+    - name: Test
+      run: dotnet test --no-build --verbosity normal
+      
     - name: Echo secrets
       run: |
         mkdir BoardCutter/Properties/PublishProfiles
@@ -36,5 +43,13 @@ jobs:
         dotnet build --no-restore
         dotnet publish ./BoardCutter.sln /p:PublishProfileFullPath=BoardCutter/Properties/PublishProfiles/FTPProfile.pubxml
         ls BoardCutter/bin/Release/net8.0/publish/
-    - name: Test
-      run: dotnet test --no-build --verbosity normal
+        
+    - name: 📂 Sync files
+      uses: SamKirkland/FTP-Deploy-Action@4.3.2
+      with:
+        server: ${{ secrets.ftpServer }}   
+        username: ${{ secrets.ftpUserName }}   
+        password: ${{ secrets.ftpPassword }}      
+        protocol: ftps
+        local-dir: BoardCutter/bin/Release/net8.0/publish/
+        server-dir: /staging/boardcutter
