@@ -27,14 +27,14 @@ jobs:
     - name: Echo secrets
       run: |
         pwd
-        echo $STAGING_PUBLISH_FILE >> src/staging_publish.xml
-        cat src/staging_publish.xml
-        ls src/*
+        echo $STAGING_PUBLISH_FILE >> staging_publish.xml
+        cat staging_publish.xml
+        ls
         
     - name: Build
       run: |
         dotnet build --no-restore
-        dotnet publish ./BoardCutter.sln /p:PublishProfile=src/staging_publish.xml
+        dotnet publish ./BoardCutter.sln /p:PublishProfile=staging_publish.xml
         
     - name: Test
       run: dotnet test --no-build --verbosity normal
