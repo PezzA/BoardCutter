@@ -1,0 +1,57 @@
+# This workflow will build a .NET project
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
+
+name: .NET
+
+on:
+  push:
+    branches: [ "staging" ]
+  pull_request:
+    branches: [ "staging" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+        
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: 🔧 Build
+      run: dotnet build --no-restore
+
+    - name: ❓Test
+      run: dotnet test --no-build --verbosity normal
+        
+    - name: 📔 Publish
+      run: dotnet publish ./BoardCutter.sln
+
+    - name: Cleanup and Configure
+      run: |
+        rm BoardCutter/bin/Release/net8.0/publish/appsettings.Development.json
+        
+    - name: Find and Replace
+      uses: jacobtomlinson/gha-find-replace@v3
+      with:
+        include: "BoardCutter/bin/Release/net8.0/publish/appsettings.json"
+        find: "##DB-CONNECTION-STRING##"
+        replace: "${{ secrets.STAGING_SQL_SERVER }} "
+        regex: false
+          
+    - name: 📂 Sync files
+      uses: SamKirkland/FTP-Deploy-Action@4.3.2
+      with:
+        server: ${{ secrets.STAGING_FTP_SERVER }}   
+        username: ${{ secrets.STAGING_FTP_USERNAME }}   
+        password: ${{ secrets.STAGING_FTP_PASSWORD }}      
+        protocol: ftps
+        local-dir: BoardCutter/bin/Release/net8.0/publish/
+        server-dir: /${{ secrets.STAGING_FTP_USERNAME }}/Staging/BoardCutter/
+        dangerous-clean-slate: true
