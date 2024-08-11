@@ -52,4 +52,4 @@ jobs:
         password: ${{ secrets.STAGING_FTP_PASSWORD }}      
         protocol: ftps
         local-dir: BoardCutter/bin/Release/net8.0/publish/
-        server-dir: /staging/boardcutter/
+        server-dir: /Staging/BoardCutter/
