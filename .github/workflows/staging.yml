@@ -47,9 +47,9 @@ jobs:
     - name: 📂 Sync files
       uses: SamKirkland/FTP-Deploy-Action@4.3.2
       with:
-        server: ${{ secrets.ftpServer }}   
-        username: ${{ secrets.ftpUserName }}   
-        password: ${{ secrets.ftpPassword }}      
+        server: ${{ secrets.STAGING_FTP_SERVER }}   
+        username: ${{ secrets.STAGING_FTP_USERNAME }}   
+        password: ${{ secrets.STAGING_FTP_PASSWORD }}      
         protocol: ftps
         local-dir: BoardCutter/bin/Release/net8.0/publish/
         server-dir: /staging/boardcutter
