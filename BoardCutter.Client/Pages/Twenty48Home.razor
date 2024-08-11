@@ -1,0 +1,21 @@
+﻿@page "/Twenty48"
+@rendermode InteractiveAuto
+@using Microsoft.AspNetCore.SignalR.Client
+@inject NavigationManager Navigation
+
+<PageTitle>Twenty48</PageTitle>
+
+<h2>2048</h2>
+<p>
+    <ul>
+        <li>Shunt the cells.</li>
+        <li>If 2 cells of the same value get shunted together, they merge!</li>
+        <li>Can you merge a cell all the way to 2048?</li>
+    </ul>
+</p>
+
+<button type="submit" class="w-100 btn btn-lg btn-primary">New game</button>
+
+@code {
+
+}
