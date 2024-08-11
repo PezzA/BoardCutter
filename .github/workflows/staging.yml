@@ -33,6 +33,18 @@ jobs:
     - name: 📔 Publish
       run: dotnet publish ./BoardCutter.sln
 
+    - name: Cleanup and Configure
+      run: |
+        rm BoardCutter/bin/Release/net8.0/publish/appsettings.Development.json
+        
+    - name: Find and Replace
+      uses: jacobtomlinson/gha-find-replace@v3
+      with:
+        include: "BoardCutter/bin/Release/net8.0/publish/appsettings.json"
+        find: "##DB-CONNECTION-STRING##"
+        replace: "${{ secrets.STAGING_SQL_SERVER }} "
+        regex: false
+          
     - name: 📂 Sync files
       uses: SamKirkland/FTP-Deploy-Action@4.3.2
       with:
