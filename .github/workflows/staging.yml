@@ -26,6 +26,7 @@ jobs:
 
     - name: Echo secrets
       run: |
+        pwd
         echo $STAGING_PUBLISH_FILE >> src/staging_publish.xml
         cat src/staging_publish.xml
         ls src/*
