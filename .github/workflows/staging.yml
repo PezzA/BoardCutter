@@ -20,11 +20,19 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 8.0.x
+        
     - name: Restore dependencies
       run: dotnet restore
+
+    - name: Echo secrets
+      run: |
+        echo $STAGING_PUBLISH_FILE >> staging_publish.xml
+        cat staging_publish.xml
+        
     - name: Build
       run: |
         dotnet build --no-restore
-        dotnet publish ./BoardCutter.sln /p:PublishProfile=test.xml
+        dotnet publish ./BoardCutter.sln /p:PublishProfile=staging_publish.xml
+        
     - name: Test
       run: dotnet test --no-build --verbosity normal
