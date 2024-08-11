@@ -28,16 +28,13 @@ jobs:
       run: |
         mkdir BoardCutter/Properties/PublishProfiles
         echo $STAGING_PUBLISH_FILE >> BoardCutter/Properties/PublishProfiles/FTPProfile.pubxml
-        cat BoardCutter/Properties/PublishProfiles/FTPProfile.pubxml
-        ls BoardCutter/Properties/PublishProfiles
       env:
         STAGING_PUBLISH_FILE: ${{ secrets.STAGING_PUBLISH_FILE }}
-
         
     - name: Build
       run: |
         dotnet build --no-restore
         dotnet publish ./BoardCutter.sln /p:PublishProfileFullPath=BoardCutter/Properties/PublishProfiles/FTPProfile.pubxml
-        
+        ls BoardCutter/bin/Release/net8.0/publish/
     - name: Test
       run: dotnet test --no-build --verbosity normal
