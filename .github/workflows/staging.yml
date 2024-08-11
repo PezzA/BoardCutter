@@ -31,13 +31,16 @@ jobs:
       run: dotnet test --no-build --verbosity normal
         
     - name: 📔 Publish
+      if: github.ref == 'refs/heads/staging'  
       run: dotnet publish ./BoardCutter.sln
 
     - name: Cleanup and Configure
+      if: github.ref == 'refs/heads/staging'  
       run: |
         rm BoardCutter/bin/Release/net8.0/publish/appsettings.Development.json
         
     - name: Find and Replace
+      if: github.ref == 'refs/heads/staging'  
       uses: jacobtomlinson/gha-find-replace@v3
       with:
         include: "BoardCutter/bin/Release/net8.0/publish/appsettings.json"
@@ -46,6 +49,7 @@ jobs:
         regex: false
           
     - name: 📂 Sync files
+      if: github.ref == 'refs/heads/staging'  
       uses: SamKirkland/FTP-Deploy-Action@4.3.2
       with:
         server: ${{ secrets.STAGING_FTP_SERVER }}   
