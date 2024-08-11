@@ -24,26 +24,26 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore
 
-    - name: Build
+    - name: 🔧 Build
       run: |
         dotnet build --no-restore
 
-    - name: Test
+    - name: ❓Test
       run: dotnet test --no-build --verbosity normal
       
-    - name: Echo secrets
+    - name: 😉 Echo secrets
       run: |
         mkdir BoardCutter/Properties/PublishProfiles
         echo $STAGING_PUBLISH_FILE >> BoardCutter/Properties/PublishProfiles/FTPProfile.pubxml
       env:
         STAGING_PUBLISH_FILE: ${{ secrets.STAGING_PUBLISH_FILE }}
         
-    - name: Build
+    - name: 📔 Publish
       run: |
         dotnet build --no-restore
-        dotnet publish ./BoardCutter.sln /p:PublishProfileFullPath=BoardCutter/Properties/PublishProfiles/FTPProfile.pubxml
-        ls BoardCutter/bin/Release/net8.0/publish/
-        
+        dotnet publish ./BoardCutter.sln
+
+    
     - name: 📂 Sync files
       uses: SamKirkland/FTP-Deploy-Action@4.3.2
       with:
@@ -53,4 +53,3 @@ jobs:
         protocol: ftps
         local-dir: BoardCutter/bin/Release/net8.0/publish/
         server-dir: /${{ secrets.STAGING_FTP_USERNAME }}/Staging/BoardCutter/
-        dangerous-clean-slate: true
