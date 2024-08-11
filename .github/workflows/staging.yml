@@ -30,6 +30,9 @@ jobs:
         echo $STAGING_PUBLISH_FILE >> BoardCutter/Properties/PublishProfiles/FTPProfile.pubxml
         cat BoardCutter/Properties/PublishProfiles/FTPProfile.pubxml
         ls BoardCutter/Properties/PublishProfiles
+      env:
+        PRIVATE_KEY: ${{ secrets.STAGING_PUBLISH_FILE }}
+
         
     - name: Build
       run: |
