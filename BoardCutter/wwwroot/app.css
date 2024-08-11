@@ -49,3 +49,13 @@ h1:focus {
 .darker-border-checkbox.form-check-input {
     border-color: #929292;
 }
+
+.logo {
+    font-family: "Princess Sofia", cursive;
+    color: white;
+    font-size: 32pt;
+    font-weight: 100;
+    font-style: normal;
+    text-shadow: 2px 2px 4px black;
+    text-decoration:none;
+}
