@@ -1,0 +1,57 @@
+﻿@using BoardCutter.Games.Twenty48
+@using BoardCutter.Games.Twenty48.Standard
+
+@inject IJSRuntime JS
+
+<div id="gameArea">
+
+    <div>Score: @Score</div>
+
+    <div id="gameBoard" style="position: absolute; background-color: #bbada0; width: 690px; height: 690px;">
+    </div>
+</div>
+
+@code {
+    [Parameter] public int Score { get; set; }
+    [Parameter] public NumberCell[] Cells { get; set; } = [];
+    [Parameter] public EventCallback<Direction> ProcessMove { get; set; }
+
+    private DotNetObjectReference<Grid>? _objRef;
+
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await JS.InvokeVoidAsync("sendCells", [Cells]);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _objRef = DotNetObjectReference.Create(this);
+            await JS.InvokeVoidAsync("initGrid", _objRef, Cells);
+        }
+
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+    [JSInvokable("Move")]
+    public async Task Move(string direction)
+    {
+        switch (direction)
+        {
+            case "ArrowUp":
+                await ProcessMove.InvokeAsync(Direction.Up);
+                break;
+            case "ArrowDown":
+                await ProcessMove.InvokeAsync(Direction.Down);
+                break;
+            case "ArrowRight":
+                await ProcessMove.InvokeAsync(Direction.Right);
+                break;
+            case "ArrowLeft":
+                await ProcessMove.InvokeAsync(Direction.Left);
+                break;
+        }
+    }
+}
