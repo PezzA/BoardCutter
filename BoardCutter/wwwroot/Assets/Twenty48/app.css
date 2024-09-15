@@ -1,0 +1,71 @@
+﻿.cell {
+    height: 79px;
+    width: 79px;
+    position: absolute;
+    text-align: center;
+    font-size: 35px;
+    border-radius: 7px;
+    transition-duration: 0.1s;
+    animation-duration: 0.1s;
+    animation-name: slidein;
+}
+
+@keyframes slidein {
+    from {
+        translate: 150vw 0;
+        scale: 200% 1;
+    }
+
+    to {
+        translate: 0 0;
+        scale: 100% 1;
+    }
+}
+
+
+.cell-1 {
+    background: rgba(237, 228, 218, 0.35);
+}
+
+.cell-3 {
+    background: #eee3da;
+}
+
+.cell-5 {
+    background: #eee0c9;
+}
+
+.cell-9 {
+    color: #f8f6f2;
+    background: #f2b27a;
+}
+
+.cell-17 {
+    color: #f8f6f2;
+    background: #f69663;
+}
+
+.cell-33 {
+    color: #f8f6f2;
+    background: #f76c5f;
+}
+
+.cell-65 {
+    color: #f8f6f2;
+    background: #f74f3b;
+}
+
+.cell-129 {
+    color: #f8f6f2;
+    background: #edd072;
+    box-shadow: -1 0 30px 10px rgba(243, 215, 116, 0.2380952381), inset 0 0 0 1px rgba(255, 255, 255, 0.1428571429);
+    font-size: 44px;
+}
+
+.cell-257 {
+    color: #f8f6f2;
+    background: #edcc61;
+    box-shadow: -1 0 30px 10px rgba(243, 215, 116, 0.3174603175), inset 0 0 0 1px rgba(255, 255, 255, 0.1904761905);
+    font-size: 44px;
+}
+

@@ -1,7 +1,14 @@
 ﻿@page "/Twenty48"
 @rendermode InteractiveAuto
+
+@using BoardCutter.Games.Twenty48.Standard
+@using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.SignalR.Client
+@using System.Text.Json
+
 @inject NavigationManager Navigation
+@inject IJSRuntime JS
+@attribute [Authorize]
 
 <PageTitle>Twenty48</PageTitle>
 
@@ -14,8 +21,74 @@
     </ul>
 </p>
 
-<button type="submit" class="w-100 btn btn-lg btn-primary">New game</button>
+<button @onclick="Send" class="w-100 btn btn-lg btn-primary">New game</button>
 
 @code {
+    
+    private async Task Debug(string message)
+    {
+        await JS.InvokeAsync<string>("console.log", message);
+    }
 
+    private async Task Error(string message)
+    {
+        await JS.InvokeAsync<string>("console.error", message);
+    }
+
+    private async Task Send()
+    {
+        if (_hubConnection is not null)
+        {
+            await _hubConnection.SendAsync("StartNew");
+        }
+    }
+
+
+    private HubConnection? _hubConnection;
+
+    public bool IsConnected =>
+        _hubConnection?.State == HubConnectionState.Connected;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (_hubConnection != null || !OperatingSystem.IsBrowser()) return;
+
+        _hubConnection = new HubConnectionBuilder()
+             .WithUrl(Navigation.ToAbsoluteUri("/twenty48hub"))
+             .Build();
+
+        _hubConnection.On("GoHome", (string message) =>
+        {
+            if (!string.IsNullOrEmpty(message))
+            {
+            }
+
+            Navigation.NavigateTo("/");
+        });
+
+        _hubConnection.On(Server2048Messages.ErrorMessage, async (string message) =>
+        {
+            // TODO - Redo error message.
+            // Toast(message, Severity.Warning);
+            await InvokeAsync(StateHasChanged);
+        });
+
+        _hubConnection.On("SetPlayerGame", async (string message) =>
+            {
+                await Debug($"SetPlayerGame: {message}");
+
+                var publicVisible = string.IsNullOrEmpty(message)
+                    ? null
+                    : JsonSerializer.Deserialize<PublicVisible>(message);
+
+                if (publicVisible == null) return;
+
+                Navigation.NavigateTo($"/Twenty48/{publicVisible.GameId}");
+
+                await InvokeAsync(StateHasChanged);
+            });
+
+        await _hubConnection.StartAsync();
+        await _hubConnection.SendAsync(Server2048Messages.AckHome, "ping");
+    }
 }

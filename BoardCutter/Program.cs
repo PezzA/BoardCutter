@@ -6,6 +6,13 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.ResponseCompression;
 using BoardCutter.Hubs;
+using BoardCutter.Games.Twenty48.Server;
+using Akka.Hosting;
+using BoardCutter.Core.Actors;
+using Akka.Actor;
+using Microsoft.AspNetCore.SignalR;
+using BoardCutter.Core.Actors.HubWriter;
+using BoardCutter.Core.Players;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -50,6 +57,42 @@ builder.Services.AddResponseCompression(opts =>
         ["application/octet-stream"]);
 });
 
+builder.Services.AddSingleton<IPlayerService, MemoryPlayerService>();
+
+builder.Services.AddAkka("MyActorSystem", configurationBuilder =>
+{
+    configurationBuilder
+        .WithActors((system, registry, resolver) =>
+        {
+            var twenty48HubWriter =
+                system.ActorOf(
+                    Props.Create(() =>
+                        new HubClientWriter<Twenty48Hub>(
+                            resolver.GetService<IHubContext<Twenty48Hub>>(),
+                            resolver.GetService<IPlayerService>())),
+                    "2048HubWriter");
+
+            var gameActors = new Dictionary<string, Props>
+            {
+                {
+                    "2048",
+
+                    Props.Create(() =>  new BoardCutter.Games.Twenty48.Server.Actors.GameActor(twenty48HubWriter, new RandomTilePlacer()))
+                }
+            };
+
+            var gameManagerActor =
+                system.ActorOf(
+                    Props.Create(
+                        () => new GameManager(gameActors)),
+
+                    "GameManagerActor");
+
+            registry.Register<GameManager>(gameManagerActor);
+        });
+});
+
+
 var app = builder.Build();
 
 app.UseResponseCompression();
@@ -81,5 +124,6 @@ app.MapRazorComponents<App>()
 app.MapAdditionalIdentityEndpoints();
 
 app.MapHub<ChatHub>("/chathub");
+app.MapHub<Twenty48Hub>("/twenty48hub");
 
 app.Run();

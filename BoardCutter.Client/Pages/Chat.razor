@@ -38,7 +38,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-  
+
 
         if (OperatingSystem.IsBrowser())
         {
@@ -66,6 +66,7 @@
             await hubConnection.SendAsync("SendMessage", userInput, messageInput);
         }
     }
+
 
     public bool IsConnected =>
         hubConnection?.State == HubConnectionState.Connected;
