@@ -1,4 +1,4 @@
-﻿const CELL_WIDTH = 160;
+﻿const CELL_WIDTH = 80;
 const CELL_MARGIN = 10;
 
 function toPixels(input) {
@@ -48,7 +48,7 @@ window.initGrid = (dotNetHelper, cells) => {
 
     // https://stackoverflow.com/questions/2264072/detect-a-finger-swipe-through-javascript-on-the-iphone-and-android
     gameArea.addEventListener('touchstart', handleTouchStart, false);
-    gameArea.addEventListener('touchmove', handleTouchMove, false);
+    gameArea.addEventListener('touchend', handleTouchEnd, false);
 
     window.addEventListener("keydown", function (e) {
         if (e.repeat) return;
@@ -77,20 +77,22 @@ function getTouches(evt) {
 }
 
 function handleTouchStart(evt) {
+    console.log(evt);
     evt.preventDefault();
     const firstTouch = getTouches(evt)[0];
     xDown = firstTouch.clientX;
     yDown = firstTouch.clientY;
 };
 
-function handleTouchMove(evt) {
+function handleTouchEnd(evt) {
+    console.log(evt);
     evt.preventDefault();
     if (!xDown || !yDown) {
         return;
     }
 
-    var xUp = evt.touches[0].clientX;
-    var yUp = evt.touches[0].clientY;
+    var xUp = evt.changedTouches[0].clientX;
+    var yUp = evt.changedTouches[0].clientY;
 
     var xDiff = xDown - xUp;
     var yDiff = yDown - yUp;
