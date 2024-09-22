@@ -4,11 +4,12 @@
 @inject IJSRuntime JS
 
 <div id="gameArea">
+    <div id="debug">
+        <span id="debugText"></span>
+    </div>
 
     <div>Score: @Score</div>
-
-    <div id="gameBoard" style="position: absolute; background-color: #bbada0; width: 370px; height: 370px;">
-    </div>
+    <div id="gameBoard"></div>
 </div>
 
 @code {
