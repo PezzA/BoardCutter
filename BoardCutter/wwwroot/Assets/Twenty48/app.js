@@ -1,6 +1,5 @@
-﻿const CELL_WIDTH = 80;
-const CELL_MARGIN = 10;
-
+﻿let CELL_WIDTH = 80;
+let CELL_MARGIN = 10;
 function toPixels(input) {
     return (input * (CELL_WIDTH + CELL_MARGIN)) + CELL_MARGIN;
 }
@@ -39,16 +38,63 @@ function addCell(id, value, x, y) {
     }
 }
 
+var prevSize = null;
+var sizeChanged = false;
+
+function resize(forceDraw) {
+    var bounds = document.getElementById('gameBoard').getBoundingClientRect();
+
+    if (bounds.width == 200 && prevSize != 200) {
+        CELL_WIDTH = 45;
+        CELL_MARGIN = 4;
+        sizeChanged = true;
+    } else if (bounds.width == 300 && prevSize != 300) {
+        CELL_WIDTH = 70;
+        CELL_MARGIN = 4;
+        sizeChanged = true;
+    } else if (bounds.width == 370 && prevSize != 370) {
+        CELL_WIDTH = 80;
+        CELL_MARGIN = 10;
+        sizeChanged = true;
+    }
+
+    if (sizeChanged || forceDraw) {
+        console.log('redraw');
+        prevSize = bounds.width;
+        sizeChanged = false;
+
+        var debugElement = document.getElementById('debugText');
+        debugElement.innerText = `Width: ${bounds.width}, Cell Width: ${CELL_WIDTH}, Margin: ${CELL_MARGIN}`;
+
+        document.getElementById('gameBoard').innerHTML = '';
+
+        for (let x = 0; x < 4; x++) {
+            for (let y = 0; y < 4; y++) {
+                addCell(0, 0, x, y);
+            }
+        }
+
+        drawCells(modCells);
+    }
+}
+
+let modCells = [];
+
 window.initGrid = (dotNetHelper, cells) => {
     console.log('JS Game Init');
+   
+    window.addEventListener('resize', function () {
+        resize();
+    }, true);
 
-    const gameArea = document.getElementById("gameArea");
+  
+    const gameBoard = document.getElementById("gameBoard");
 
     window.dotNetHelper = dotNetHelper;
 
     // https://stackoverflow.com/questions/2264072/detect-a-finger-swipe-through-javascript-on-the-iphone-and-android
-    gameArea.addEventListener('touchstart', handleTouchStart, false);
-    gameArea.addEventListener('touchend', handleTouchEnd, false);
+    gameBoard.addEventListener('touchstart', handleTouchStart, false);
+    gameBoard.addEventListener('touchend', handleTouchEnd, false);
 
     window.addEventListener("keydown", function (e) {
         if (e.repeat) return;
@@ -59,15 +105,19 @@ window.initGrid = (dotNetHelper, cells) => {
         }
     });
 
+    modCells = cells;
+    resize(true);
+};
+
+function drawGame() {
     for (let x = 0; x < 4; x++) {
         for (let y = 0; y < 4; y++) {
             addCell(0, 0, x, y);
         }
     }
-    
-    drawCells(cells);
-};
 
+    drawCells(modCells);
+}
 var xDown = null;
 var yDown = null;
 
@@ -115,7 +165,8 @@ function handleTouchEnd(evt) {
     yDown = null;
 };
 
-function drawCells(cells){
+
+function drawCells(cells) {
     cells.forEach(cell => {
         const cellElement = document.getElementById(getCellId(cell.id));
 
@@ -136,11 +187,13 @@ function drawCells(cells){
                 }
             }
         });
-    }, 100);
+    }, 75);
 }
+
 /*
  This is called from the blazor app each time we receive game state from the server.
  */
 window.sendCells = (cells) => {
-   drawCells(cells);
+    modCells = cells;
+    drawCells(cells);
 };
