@@ -1,4 +1,4 @@
-﻿@page "/Twenty48"
+﻿@page "/2048"
 @rendermode InteractiveAuto
 
 @using BoardCutter.Games.Twenty48.Standard
@@ -10,7 +10,7 @@
 @inject IJSRuntime JS
 @attribute [Authorize]
 
-<PageTitle>Twenty48</PageTitle>
+<PageTitle>2048</PageTitle>
 
 <h2>2048</h2>
 <p>
@@ -21,10 +21,15 @@
     </ul>
 </p>
 
-<button @onclick="Send" class="w-100 btn btn-lg btn-primary">New game</button>
+<button @onclick="Send" class="w-100 btn btn-lg btn-primary" disabled="@(!IsConnected)">New game</button>
 
 @code {
-    
+    private HubConnection? _hubConnection;
+
+    public bool IsConnected =>
+     _hubConnection?.State == HubConnectionState.Connected;
+
+
     private async Task Debug(string message)
     {
         await JS.InvokeAsync<string>("console.log", message);
@@ -43,12 +48,6 @@
         }
     }
 
-
-    private HubConnection? _hubConnection;
-
-    public bool IsConnected =>
-        _hubConnection?.State == HubConnectionState.Connected;
-
     protected override async Task OnInitializedAsync()
     {
         if (_hubConnection != null || !OperatingSystem.IsBrowser()) return;
@@ -57,24 +56,7 @@
              .WithUrl(Navigation.ToAbsoluteUri("/twenty48hub"))
              .Build();
 
-        _hubConnection.On("GoHome", (string message) =>
-        {
-            if (!string.IsNullOrEmpty(message))
-            {
-            }
-
-            Navigation.NavigateTo("/");
-        });
-
-        _hubConnection.On(Server2048Messages.ErrorMessage, async (string message) =>
-        {
-            // TODO - Redo error message.
-            // Toast(message, Severity.Warning);
-            await InvokeAsync(StateHasChanged);
-        });
-
-        _hubConnection.On("SetPlayerGame", async (string message) =>
-            {
+        _hubConnection.On("SetPlayerGame", async (string message) => {
                 await Debug($"SetPlayerGame: {message}");
 
                 var publicVisible = string.IsNullOrEmpty(message)

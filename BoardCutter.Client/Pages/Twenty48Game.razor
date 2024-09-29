@@ -20,13 +20,6 @@
 
 @switch (_gameStatus)
 {
-    case GameStatus.SettingUp:
-        <div>Game is setting up, current size is @_gridSize</div>
-
-        <button @onclick="Start" disabled="@(!IsConnected)">Start Game!</button>
-    
-        break;
-
     case GameStatus.Running:
     case GameStatus.Results:
         <Grid Score="_score"
@@ -41,10 +34,10 @@
         <div>
             <button @onclick="Leave" disabled="@(!IsConnected)">Back to Home</button>
         </div>
-
         break;
     default:
-        throw new ArgumentOutOfRangeException();
+        <div>Not sure what to do with @_gameStatus</div>
+        break;
 }
 
 
