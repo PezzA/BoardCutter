@@ -64,26 +64,6 @@ public class GameActor : ReceiveActor
 
     private void BroadcastRequest(GameMessages.BroadcastRequest msg) => BroadCastVisible();
 
-    private void CreateGame(GameManagerMessages.CreateGameSpecificRequest message)
-    {
-        _owner = message.Player;
-        _gameId = string.IsNullOrEmpty(message.GameId)
-            ? _gameId
-            : message.GameId;
-
-
-        _gameStatus = GameStatus.SettingUp;
-        Context.Parent.Tell(new GameManagerNotifications.GameCreated(GetBaseDetails()));
-
-        _hubWriterActor.Tell(new HubWriterMessages.WriteClientObject(
-            _owner, 
-            "SetPlayerGame",
-            GetPublicVisibleData()));
-
-        BroadCastVisible();
-    }
-
-
     private void LeaveGameRequest(GameMessages.LeaveGameRequest message)
     {
         
@@ -137,6 +117,23 @@ public class GameActor : ReceiveActor
 
         SetGameStatus(GameStatus.Running);
         BroadCastVisible();
+    }
+
+    private void CreateGame(GameManagerMessages.CreateGameSpecificRequest message)
+    {
+        _owner = message.Player;
+        _gameId = string.IsNullOrEmpty(message.GameId)
+            ? _gameId
+            : message.GameId;
+
+        Context.Parent.Tell(new GameManagerNotifications.GameCreated(GetBaseDetails()));
+
+        _hubWriterActor.Tell(new HubWriterMessages.WriteClientObject(
+            _owner,
+            "SetPlayerGame",
+            GetPublicVisibleData()));
+
+        StartGameRequest(new GameMessages.StartGameRequest(_owner));
     }
 
     private void MoveRequest(GameMessages.MoveRequest message)
