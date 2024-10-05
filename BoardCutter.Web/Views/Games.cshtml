@@ -1,0 +1,45 @@
+﻿@using Umbraco.Cms.Web.Common.PublishedModels;
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage<ContentModels.Games>
+@using ContentModels = Umbraco.Cms.Web.Common.PublishedModels;
+@{
+	Layout = "MasterPage.cshtml";
+}
+
+<h1>Games Pages!</h1>
+<p id="connect" style="color:green"></p>
+<p id="pong" style="color:blue"></p>
+<p id="error" style="color:red"></p>
+
+<!-- We reference the signalR js file that comes with Umbraco -->
+<script type="text/javascript" src="/umbraco/lib/signalr/signalr.min.js"></script>
+<script>
+
+    var setText = (id, text) => { 
+        document.getElementById(id).innerText = text;
+    };
+
+    var connection = new signalR.HubConnectionBuilder()
+        .withUrl("/umbraco/testhub") // this is the url that we created in the routing `TestHubRoutes.GetTestHubRoute()`
+        .withAutomaticReconnect()
+        .configureLogging(signalR.LogLevel.Warning)
+        .build();
+    
+    // register our callbacks when the hub sends us an event
+        connection.on("Pong", function () {
+            setText("pong", "Pong");
+        });
+
+    // start the connection
+    connection.start().then(function () {
+        setText("connect", "signalR connection established");
+
+        // connection is established => call a function on the hub
+        connection.invoke("Ping").catch(function (err) {
+            setText("error", "Could not invoke method [Ping] on signalR connection");
+            return console.error("Could not invoke method [Ping] on signalR connection", err.toString());
+        });
+    }).catch(function (err) {
+        setText("error", "could not establish a signalR connection");
+        return console.error("could not establish a signalR connection", err.toString());
+    });
+</script>
