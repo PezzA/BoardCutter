@@ -37,7 +37,7 @@ jobs:
     - name: Cleanup and Configure
       if: github.ref == 'refs/heads/staging'  
       run: |
-        rm BoardCutter/bin/Release/net8.0/publish/appsettings.Development.json
+        rm BoardCutter.Web/bin/Release/net8.0/publish/appsettings.Development.json
         
     - name: Find and Replace
       if: github.ref == 'refs/heads/staging'  
