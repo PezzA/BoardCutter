@@ -43,9 +43,9 @@ jobs:
       if: github.ref == 'refs/heads/staging'  
       uses: jacobtomlinson/gha-find-replace@v3
       with:
-        include: "BoardCutter/bin/Release/net8.0/publish/appsettings.json"
+        include: "BoardCutter.Web/bin/Release/net8.0/publish/appsettings.json"
         find: "##DB-CONNECTION-STRING##"
-        replace: "${{ secrets.STAGING_SQL_SERVER }} "
+        replace: "${{ secrets.STAGING_UMBRACO_SQL_SERVER }} "
         regex: false
           
     - name: 📂 Sync files
@@ -56,6 +56,6 @@ jobs:
         username: ${{ secrets.STAGING_FTP_USERNAME }}   
         password: ${{ secrets.STAGING_FTP_PASSWORD }}      
         protocol: ftps
-        local-dir: BoardCutter/bin/Release/net8.0/publish/
+        local-dir: BoardCutter.Web/bin/Release/net8.0/publish/
         server-dir: /${{ secrets.STAGING_FTP_USERNAME }}/Staging/BoardCutter/
         dangerous-clean-slate: true
