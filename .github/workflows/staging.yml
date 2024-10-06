@@ -58,4 +58,4 @@ jobs:
         protocol: ftps
         local-dir: BoardCutter.Web/bin/Release/net8.0/publish/
         server-dir: /${{ secrets.STAGING_FTP_USERNAME }}/Staging/BoardCutter/
-        dangerous-clean-slate: true
+        dangerous-clean-slate: false
