@@ -1,11 +1,6 @@
-﻿using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.SignalR;
-using Microsoft.Extensions.DependencyInjection;
-
+﻿using Microsoft.AspNetCore.SignalR;
 using Umbraco.Cms.Core.Composing;
-using Umbraco.Cms.Core.DependencyInjection;
 using Umbraco.Cms.Web.Common.ApplicationBuilder;
-using Umbraco.Extensions;
 
 public class TestHubComposer : IComposer
 {

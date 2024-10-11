@@ -1,0 +1,107 @@
+﻿@using Umbraco.Cms.Web.Common.PublishedModels;
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage<ContentModels.Twenty48>
+@using ContentModels = Umbraco.Cms.Web.Common.PublishedModels;
+@{
+    Layout = "MasterPage.cshtml";
+}
+<h1>2048</h1>
+
+<div id="newGame" hidden="hidden">
+    <p>
+        <ul>
+            <li>Shunt the cells.</li>
+            <li>If 2 cells of the same value get shunted together, they merge!</li>
+            <li>Can you merge a cell all the way to 2048?</li>
+        </ul>
+    </p>
+
+    <button class="w-100 btn btn-lg btn-primary" onclick="startGame()">New game</button>
+</div>
+
+<div id="runningGame">
+
+</div>
+
+<div id="debug">
+    <p id="connect" style="color:green"></p>
+    <p id="pong" style="color:blue"></p>
+    <p id="error" style="color:red"></p>
+    <p id="log" style="color:orange"></p>
+</div>
+
+
+<script type="text/javascript" src="/umbraco/lib/signalr/signalr.min.js"></script>
+<script>
+
+    const setText = (id, text, append = false) => {
+        const element = document.getElementById(id);
+
+        if (append) {
+            element.innerHTML += '<br />' + text;
+        } else {
+            element.innerHTML = text;
+        }
+    };
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const myParam = urlParams.get('gameId');
+
+    if (myParam) {
+        setText('log', 'QS' + myParam, true)
+    }
+
+
+
+
+
+    var startGame = () => {
+        connection
+            .invoke("StartNew")
+            .catch(function (err) {
+                setText("error", "Could not invoke method [Ping] on signalR connection");
+                return console.error("Could not invoke method [Ping] on signalR connection", err.toString());
+            });
+    };
+
+    var connection = new signalR.HubConnectionBuilder()
+        .withUrl("/Twenty48Hub") // this is the url that we created in the routing `TestHubRoutes.GetTestHubRoute()`
+        .withAutomaticReconnect()
+        .configureLogging(signalR.LogLevel.Warning)
+        .build();
+
+    // register our callbacks when the hub sends us an event
+    connection
+        .on("Pong", function (message) {
+            setText("pong", message);
+        });
+
+    // register our callbacks when the hub sends us an event
+    connection
+        .on("SetPlayerGame", function (message) {
+            var data = JSON.parse(message);
+            setText('log', message, true);
+            console.log(data);
+            window.location.href += '?gameId=' + data.GameId;
+        });
+
+    // start the connection
+    connection
+        .start()
+        .then(function () {
+            setText("connect", "signalR connection established");
+
+            connection
+                .invoke("AckHome", "Pong")
+                .catch(function (err) {
+                    setText("error", "Could not invoke method [AckHome] on signalR connection");
+                    return console.error("Could not invoke method [AckHome] on signalR connection", err.toString());
+                });
+        })
+        .catch(function (err) {
+            setText("error", "could not establish a signalR connection");
+            return console.error("could not establish a signalR connection", err.toString());
+        });
+
+
+</script>
+

@@ -35,7 +35,6 @@ namespace BoardCutter.Games.Twenty48.Server
             return new GetBasicDetailsResult(true, player, gameActorResp.GameActor);
         }
 
-
         public async Task AckHome(string message) {
             var loggedInUserName = Context.User?.Identity?.Name;
 
@@ -43,7 +42,7 @@ namespace BoardCutter.Games.Twenty48.Server
 
             var player = await playerService.AddOrUpdatePlayer(loggedInUserName, Context.ConnectionId, true);
 
-            await Clients.Caller.SendAsync($"ponging your {message}, {loggedInUserName} {player.Id}.");
+            await Clients.Caller.SendAsync("Pong", $"ponging your {message}, {loggedInUserName}.");
         }
 
         public async Task InitGame(string gameId)
