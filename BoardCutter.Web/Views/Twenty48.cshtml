@@ -4,104 +4,65 @@
 @{
     Layout = "MasterPage.cshtml";
 }
+
+@section PageTitle
+{ 
+    Model.Value("pageTitle") 
+}
+
+@section StyleSheetIncludes {
+    <link href="/css/Twenty48.css" rel="stylesheet">
+}
+
 <h1>2048</h1>
 
 <div id="newGame" hidden="hidden">
-    <p>
-        <ul>
-            <li>Shunt the cells.</li>
-            <li>If 2 cells of the same value get shunted together, they merge!</li>
-            <li>Can you merge a cell all the way to 2048?</li>
-        </ul>
-    </p>
-
-    <button class="w-100 btn btn-lg btn-primary" onclick="startGame()">New game</button>
+    @Model.Value("content")
+    <button id="startGame" class="w-100 btn btn-lg btn-primary" onclick="window.Twenty48.startGame()" disabled="disabled">@Model.Value("buttonTextLoading")</button>
 </div>
 
-<div id="runningGame">
+<div id="runningGame" hidden="hidden">
+    
+    <div id="gameArea">
+        <div id="score">Score: <span id="scoreValue"></span></div>
+        <div id="gameBoard"></div>
 
+        <div id="debug" style="margin-top:50px;">
+            <span id="debugText"></span>
+        </div>
+    </div>
+    <div id="final" hidden="hidden">
+        Final Score.
+    </div>
 </div>
 
-<div id="debug">
-    <p id="connect" style="color:green"></p>
-    <p id="pong" style="color:blue"></p>
-    <p id="error" style="color:red"></p>
-    <p id="log" style="color:orange"></p>
+
+<div class="accordion" id="accordionExample" style="margin-top:60px">
+    <div class="accordion-item">
+        <h2 class="accordion-header">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="true" aria-controls="collapseTwo">
+                Debug Log
+            </button>
+        </h2>
+        <div id="collapseTwo" class="accordion-collapse collapse show">
+            <div class="accordion-body">
+                <div id="debugLog">
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 
 <script type="text/javascript" src="/umbraco/lib/signalr/signalr.min.js"></script>
+<script type="text/javascript" src="/scripts/games/Twenty48.js"></script>
+
 <script>
-
-    const setText = (id, text, append = false) => {
-        const element = document.getElementById(id);
-
-        if (append) {
-            element.innerHTML += '<br />' + text;
-        } else {
-            element.innerHTML = text;
-        }
-    };
-
-    const urlParams = new URLSearchParams(window.location.search);
-    const myParam = urlParams.get('gameId');
-
-    if (myParam) {
-        setText('log', 'QS' + myParam, true)
-    }
-
-
-
-
-
-    var startGame = () => {
-        connection
-            .invoke("StartNew")
-            .catch(function (err) {
-                setText("error", "Could not invoke method [Ping] on signalR connection");
-                return console.error("Could not invoke method [Ping] on signalR connection", err.toString());
-            });
-    };
-
-    var connection = new signalR.HubConnectionBuilder()
-        .withUrl("/Twenty48Hub") // this is the url that we created in the routing `TestHubRoutes.GetTestHubRoute()`
-        .withAutomaticReconnect()
-        .configureLogging(signalR.LogLevel.Warning)
-        .build();
-
-    // register our callbacks when the hub sends us an event
-    connection
-        .on("Pong", function (message) {
-            setText("pong", message);
+    document.addEventListener("DOMContentLoaded", function () {
+        window.Twenty48.setup('/Twenty48Hub', () => {
+            const startElement = document.getElementById('startGame');
+            startElement.innerText = "@Model.Value("buttonTextReady")";
+            startElement.disabled = "";
         });
-
-    // register our callbacks when the hub sends us an event
-    connection
-        .on("SetPlayerGame", function (message) {
-            var data = JSON.parse(message);
-            setText('log', message, true);
-            console.log(data);
-            window.location.href += '?gameId=' + data.GameId;
-        });
-
-    // start the connection
-    connection
-        .start()
-        .then(function () {
-            setText("connect", "signalR connection established");
-
-            connection
-                .invoke("AckHome", "Pong")
-                .catch(function (err) {
-                    setText("error", "Could not invoke method [AckHome] on signalR connection");
-                    return console.error("Could not invoke method [AckHome] on signalR connection", err.toString());
-                });
-        })
-        .catch(function (err) {
-            setText("error", "could not establish a signalR connection");
-            return console.error("could not establish a signalR connection", err.toString());
-        });
-
-
+    });
 </script>
-

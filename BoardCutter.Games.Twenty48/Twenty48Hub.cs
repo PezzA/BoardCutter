@@ -35,14 +35,26 @@ namespace BoardCutter.Games.Twenty48.Server
             return new GetBasicDetailsResult(true, player, gameActorResp.GameActor);
         }
 
-        public async Task AckHome(string message) {
+        public async Task CheckPlayerStatus(string gameId) {
             var loggedInUserName = Context.User?.Identity?.Name;
 
             if (string.IsNullOrEmpty(loggedInUserName)) throw new InvalidDataException("Should have a user");
 
             var player = await playerService.AddOrUpdatePlayer(loggedInUserName, Context.ConnectionId, true);
 
-            await Clients.Caller.SendAsync("Pong", $"ponging your {message}, {loggedInUserName}.");
+            if (player is null)
+            {
+                await Clients.Caller.SendAsync("PlayerStatus", "Player Not Found");
+                return;
+            }
+
+            await Clients.Caller.SendAsync("PlayerStatus", "Player Found and Connected");
+
+            if (string.IsNullOrEmpty(gameId)) return;
+
+            var requestDetails = await GetBasicDetails(gameId);
+
+            requestDetails.GameActor.Tell(new GameMessages.StartGameRequest(requestDetails.Player));
         }
 
         public async Task InitGame(string gameId)
