@@ -20,9 +20,42 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 8.0.x
+        
     - name: Restore dependencies
       run: dotnet restore
-    - name: Build
+
+    - name: 🔧 Build
       run: dotnet build --no-restore
-    - name: Test
+
+    - name: ❓Test
       run: dotnet test --no-build --verbosity normal
+        
+    - name: 📔 Publish
+      if: github.ref == 'refs/heads/development'  
+      run: dotnet publish ./BoardCutter.sln
+
+    - name: Cleanup and Configure
+      if: github.ref == 'refs/heads/development'  
+      run: |
+        rm BoardCutter.Web/bin/Release/net8.0/publish/appsettings.Development.json
+        
+    - name: Find and Replace
+      if: github.ref == 'refs/heads/development'  
+      uses: jacobtomlinson/gha-find-replace@v3
+      with:
+        include: "BoardCutter.Web/bin/Release/net8.0/publish/appsettings.json"
+        find: "##DB-CONNECTION-STRING##"
+        replace: "${{ secrets.DEV_UMBRACO_SQL_SERVER }} "
+        regex: false
+          
+    - name: 📂 Sync files
+      if: github.ref == 'refs/heads/development'  
+      uses: SamKirkland/FTP-Deploy-Action@4.3.2
+      with:
+        server: ${{ secrets.STAGING_FTP_SERVER }}   
+        username: ${{ secrets.STAGING_FTP_USERNAME }}   
+        password: ${{ secrets.STAGING_FTP_PASSWORD }}      
+        protocol: ftps
+        local-dir: BoardCutter.Web/bin/Release/net8.0/publish/
+        server-dir: /${{ secrets.STAGING_FTP_USERNAME }}/Dev/BoardCutter/
+        dangerous-clean-slate: false
