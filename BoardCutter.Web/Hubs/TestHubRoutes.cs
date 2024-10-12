@@ -1,4 +1,4 @@
-﻿using BoardCutter.Games.Twenty48.Server;
+﻿using BoardCutter.Games.Twenty48;
 
 using Microsoft.Extensions.Options;
 

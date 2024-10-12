@@ -3,12 +3,10 @@ using Akka.Hosting;
 
 using BoardCutter.Core.Actors;
 using BoardCutter.Core.Players;
-using BoardCutter.Games.Twenty48.Server.Actors;
-using BoardCutter.Games.Twenty48.Standard;
 
 using Microsoft.AspNetCore.SignalR;
 
-namespace BoardCutter.Games.Twenty48.Server
+namespace BoardCutter.Games.Twenty48
 {
     public record GetBasicDetailsResult(bool Success, Player Player, IActorRef? GameActor);
 
@@ -29,13 +27,14 @@ namespace BoardCutter.Games.Twenty48.Server
                 GameManagerMessages.GetGameDetails gameActorResp)
             {
                 await Clients.Caller.SendAsync("Could not find requested game");
-                return new GetBasicDetailsResult(false, new Player(string.Empty, String.Empty, string.Empty), null);
+                return new GetBasicDetailsResult(false, new Player(string.Empty, string.Empty, string.Empty), null);
             }
 
             return new GetBasicDetailsResult(true, player, gameActorResp.GameActor);
         }
 
-        public async Task CheckPlayerStatus(string gameId) {
+        public async Task CheckPlayerStatus(string gameId)
+        {
             var loggedInUserName = Context.User?.Identity?.Name;
 
             if (string.IsNullOrEmpty(loggedInUserName)) throw new InvalidDataException("Should have a user");
@@ -54,7 +53,7 @@ namespace BoardCutter.Games.Twenty48.Server
 
             var requestDetails = await GetBasicDetails(gameId);
 
-            requestDetails.GameActor.Tell(new GameMessages.StartGameRequest(requestDetails.Player));
+            requestDetails.GameActor.Tell(new GameMessages.BroadcastRequest(requestDetails.Player));
         }
 
         public async Task InitGame(string gameId)

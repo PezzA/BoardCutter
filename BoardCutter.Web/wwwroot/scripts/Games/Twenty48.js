@@ -131,7 +131,7 @@ window.Twenty48 = {
 };
 
 let CELL_WIDTH = 80;
-let CELL_MARGIN = 10;
+let CELL_MARGIN = 5;
 function toPixels(input) {
     return (input * (CELL_WIDTH + CELL_MARGIN)) + CELL_MARGIN;
 }
@@ -176,15 +176,15 @@ var sizeChanged = false;
 function resize(forceDraw) {
     var bounds = document.getElementById('gameBoard').getBoundingClientRect();
 
-    if (bounds.width == 200 && prevSize != 200) {
-        CELL_WIDTH = 45;
-        CELL_MARGIN = 4;
+    if (bounds.width == 340 && prevSize != 340) {
+        CELL_WIDTH = 79;
+        CELL_MARGIN = 5;
         sizeChanged = true;
-    } else if (bounds.width == 300 && prevSize != 300) {
-        CELL_WIDTH = 70;
-        CELL_MARGIN = 4;
+    } else if (bounds.width == 490 && prevSize != 490) {
+        CELL_WIDTH = 110;
+        CELL_MARGIN = 10;
         sizeChanged = true;
-    } else if (bounds.width == 370 && prevSize != 370) {
+    } else if (bounds.width == 900 && prevSize != 900) {
         CELL_WIDTH = 80;
         CELL_MARGIN = 10;
         sizeChanged = true;
@@ -239,8 +239,8 @@ function initGrid()
     const gameBoard = document.getElementById("gameBoard");
 
     // https://stackoverflow.com/questions/2264072/detect-a-finger-swipe-through-javascript-on-the-iphone-and-android
-    gameBoard.addEventListener('touchstart', handleTouchStart, { passive: true });
-    gameBoard.addEventListener('touchend', handleTouchEnd, { passive: true });
+    gameBoard.addEventListener('touchstart', handleTouchStart, { passive: false });
+    gameBoard.addEventListener('touchend', handleTouchEnd, { passive: false });
 
     window.addEventListener("keydown", function (e) {
         if (e.repeat) return;

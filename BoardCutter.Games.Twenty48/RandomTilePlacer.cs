@@ -1,8 +1,7 @@
 ﻿using BoardCutter.Core;
 using BoardCutter.Core.Exceptions;
-using BoardCutter.Games.Twenty48.Standard;
 
-namespace BoardCutter.Games.Twenty48.Server;
+namespace BoardCutter.Games.Twenty48;
 
 /// <summary>
 /// Random Tile Placer will place a tile in any available cell, 80% change of a 2, 20% change of a 4.
@@ -20,13 +19,13 @@ public class RandomTilePlacer : ITilePlacer
             : 2;
 
         var candidates = new List<Point2D>();
-        
+
         for (int x = 0; x < gridSize; x++)
         {
             for (int y = 0; y < gridSize; y++)
             {
                 var point = new Point2D(x, y);
-                
+
                 var cell = GridExtensions.GetByPos(point, grid);
 
                 if (cell == null)
@@ -35,7 +34,7 @@ public class RandomTilePlacer : ITilePlacer
                 }
             }
         }
-        
+
         if (candidates.Count == 0)
         {
             throw new InvalidGameStateException("Tried to get tile for full board");

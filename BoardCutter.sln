@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.10.35122.118
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BoardCutter.Games.Twenty48.Server", "BoardCutter.Games.Twenty48\BoardCutter.Games.Twenty48.Server.csproj", "{F33419D7-CD1A-43CC-A3E2-325F1C3AA152}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BoardCutter.Games.Twenty48", "BoardCutter.Games.Twenty48\BoardCutter.Games.Twenty48.csproj", "{F33419D7-CD1A-43CC-A3E2-325F1C3AA152}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BoardCutter.Games.Twenty48.Tests", "BoardCutter.Games.Twenty48.Tests\BoardCutter.Games.Twenty48.Tests.csproj", "{C5C2E337-D016-45EA-AC82-3AA155044CCE}"
 EndProject
@@ -18,8 +18,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "2048", "2048", "{680098CE-5FC0-4BA8-A551-1CE1637360C5}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{F919EF04-6DCE-492F-9E8E-9FC3C85561CD}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BoardCutter.Games.Twenty48.Standard", "BoardCutter.Games.Twenty48.Standard\BoardCutter.Games.Twenty48.Standard.csproj", "{38519AAB-A098-4BE8-9E31-D614B4490EA0}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BoardCutter.Web", "BoardCutter.Web\BoardCutter.Web.csproj", "{CAE021DE-796B-475A-ADF4-288B3322112A}"
 EndProject
@@ -55,10 +53,6 @@ Global
 		{8679D4FE-B750-40E9-AE11-390D47BFAD63}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8679D4FE-B750-40E9-AE11-390D47BFAD63}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8679D4FE-B750-40E9-AE11-390D47BFAD63}.Release|Any CPU.Build.0 = Release|Any CPU
-		{38519AAB-A098-4BE8-9E31-D614B4490EA0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{38519AAB-A098-4BE8-9E31-D614B4490EA0}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{38519AAB-A098-4BE8-9E31-D614B4490EA0}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{38519AAB-A098-4BE8-9E31-D614B4490EA0}.Release|Any CPU.Build.0 = Release|Any CPU
 		{CAE021DE-796B-475A-ADF4-288B3322112A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{CAE021DE-796B-475A-ADF4-288B3322112A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CAE021DE-796B-475A-ADF4-288B3322112A}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -74,7 +68,6 @@ Global
 		{A47DA5A3-E31E-4125-BEFF-12AE9E31C5E2} = {F919EF04-6DCE-492F-9E8E-9FC3C85561CD}
 		{8679D4FE-B750-40E9-AE11-390D47BFAD63} = {F919EF04-6DCE-492F-9E8E-9FC3C85561CD}
 		{680098CE-5FC0-4BA8-A551-1CE1637360C5} = {C7C0F6D1-FA8A-4BC4-AFCD-C4D050FF7A37}
-		{38519AAB-A098-4BE8-9E31-D614B4490EA0} = {680098CE-5FC0-4BA8-A551-1CE1637360C5}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7285A315-74F6-43EE-BA90-EE5CB66159B7}

@@ -14,7 +14,15 @@
     <link href="/css/Twenty48.css" rel="stylesheet">
 }
 
-<h1>2048</h1>
+@section Breadcrumbs {
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">BoardCutter</a></li>
+            <li class="breadcrumb-item"><a href="/Games">Games</a></li>
+            <li class="breadcrumb-item active" aria-current="page">2048</li>
+        </ol>
+    </nav>
+}
 
 <div id="newGame" hidden="hidden">
     @Model.Value("content")

@@ -1,7 +1,6 @@
 ﻿using BoardCutter.Core.Players;
-using BoardCutter.Games.Twenty48.Standard;
 
-namespace BoardCutter.Games.Twenty48.Server.Actors;
+namespace BoardCutter.Games.Twenty48;
 
 public class GameMessages
 {

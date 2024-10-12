@@ -26,9 +26,9 @@
 
 @container (min-width: 0px) {
     #gameBoard {
-        width: 200px;
-        height: 200px;
-        margin: 20px 0 0 -100px;
+        width: 340px;
+        height: 340px;
+        margin: 5px 0 0 -170px;
     }
 
     #debug {
@@ -36,19 +36,19 @@
     }
 
     .cell {
-        height: 45px;
-        width: 45px;
-        font-size: 18px;
-        border-radius: 2px;
+        height: 79px;
+        width: 79px;
+        font-size: 32px;
+        border-radius: 8px;
     }
 }
 
 
-@container (min-width: 350px) {
+@container (min-width: 500px) {
     #gameBoard {
-        width: 300px;
-        height: 300px;
-        margin: 20px 0 0 -150px;
+        width: 490px;
+        height: 490px;
+        margin: 20px 0 0 -245px;
     }
 
     #debug {
@@ -56,14 +56,14 @@
     }
 
     .cell {
-        height: 68.75px;
-        width: 68.75px;
+        height: 110px;
+        width: 110px;
         font-size: 36px;
         border-radius: 7px;
     }
 }
 
-@container (min-width: 500px) {
+@container (min-width: 800) {
     #gameBoard {
         width: 370px;
         height: 370px;
