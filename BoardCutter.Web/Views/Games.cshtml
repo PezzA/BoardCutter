@@ -5,6 +5,8 @@
 	Layout = "MasterPage.cshtml";
 }
 
+@section PageTitle{ Games }
+
 <h1>Games Pages!</h1>
 <p id="connect" style="color:green"></p>
 <p id="pong" style="color:blue"></p>
@@ -19,7 +21,7 @@
     };
 
     var connection = new signalR.HubConnectionBuilder()
-        .withUrl("/umbraco/testhub") // this is the url that we created in the routing `TestHubRoutes.GetTestHubRoute()`
+        .withUrl("/testhub") // this is the url that we created in the routing `TestHubRoutes.GetTestHubRoute()`
         .withAutomaticReconnect()
         .configureLogging(signalR.LogLevel.Warning)
         .build();

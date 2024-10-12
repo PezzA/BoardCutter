@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Options;
+﻿using BoardCutter.Games.Twenty48.Server;
+
+using Microsoft.Extensions.Options;
 
 using Umbraco.Cms.Core.Configuration.Models;
 using Umbraco.Cms.Core.Services;
@@ -23,14 +25,17 @@ public class TestHubRoutes : IAreaRoutes
         switch (_runtimeState.Level)
         {
             case Umbraco.Cms.Core.RuntimeLevel.Run:
-                endpoints.MapHub<TestHub>(GetTestHubRoute());
+                endpoints.MapHub<TestHub>(GetTestHubRoute(nameof(TestHub), false));
+                endpoints.MapHub<Twenty48Hub>(GetTestHubRoute(nameof(Twenty48Hub), false));
                 break;
         }
 
     }
 
-    public string GetTestHubRoute()
+    public string GetTestHubRoute(string name, bool useUmbracoSegment)
     {
-        return $"/{_umbracoPathSegment}/{nameof(TestHub)}";
+        return useUmbracoSegment 
+            ? $"/{_umbracoPathSegment}/{name}"
+            : $"/{name}";
     }
 }

@@ -1,0 +1,68 @@
+﻿@using Umbraco.Cms.Web.Common.PublishedModels;
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage<ContentModels.Twenty48>
+@using ContentModels = Umbraco.Cms.Web.Common.PublishedModels;
+@{
+    Layout = "MasterPage.cshtml";
+}
+
+@section PageTitle
+{ 
+    Model.Value("pageTitle") 
+}
+
+@section StyleSheetIncludes {
+    <link href="/css/Twenty48.css" rel="stylesheet">
+}
+
+<h1>2048</h1>
+
+<div id="newGame" hidden="hidden">
+    @Model.Value("content")
+    <button id="startGame" class="w-100 btn btn-lg btn-primary" onclick="window.Twenty48.startGame()" disabled="disabled">@Model.Value("buttonTextLoading")</button>
+</div>
+
+<div id="runningGame" hidden="hidden">
+    
+    <div id="gameArea">
+        <div id="score">Score: <span id="scoreValue"></span></div>
+        <div id="gameBoard"></div>
+
+        <div id="debug" style="margin-top:50px;">
+            <span id="debugText"></span>
+        </div>
+    </div>
+    <div id="final" hidden="hidden">
+        Final Score.
+    </div>
+</div>
+
+
+<div class="accordion" id="accordionExample" style="margin-top:60px">
+    <div class="accordion-item">
+        <h2 class="accordion-header">
+            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="true" aria-controls="collapseTwo">
+                Debug Log
+            </button>
+        </h2>
+        <div id="collapseTwo" class="accordion-collapse collapse show">
+            <div class="accordion-body">
+                <div id="debugLog">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script type="text/javascript" src="/umbraco/lib/signalr/signalr.min.js"></script>
+<script type="text/javascript" src="/scripts/games/Twenty48.js"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        window.Twenty48.setup('/Twenty48Hub', () => {
+            const startElement = document.getElementById('startGame');
+            startElement.innerText = "@Model.Value("buttonTextReady")";
+            startElement.disabled = "";
+        });
+    });
+</script>
