@@ -5,6 +5,10 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <AspNetCoreHostingModel>OutOfProcess</AspNetCoreHostingModel>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="Umbraco.Cms" Version="13.5.1" />
     <PackageReference Include="uSync" Version="13.2.5" />
