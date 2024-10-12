@@ -5,7 +5,7 @@ const GAME_ID_PARAM = 'gameid';
 
 function logText(text, level) {
     var logElement = document.createElement('p');
-    logElement.innerHTML = new Date().toLocaleTimeString() + ': ' + text;
+    logElement.textContent = new Date().toLocaleTimeString() + ': ' + text;
     logElement.classList.add('log' + level);
     logContainer.appendChild(logElement);
 };
