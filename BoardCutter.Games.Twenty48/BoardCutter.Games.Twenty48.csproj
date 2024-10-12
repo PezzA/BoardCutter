@@ -13,6 +13,5 @@
     <ItemGroup>
       <ProjectReference Include="..\BoardCutter.Core.Actors\BoardCutter.Core.Actors.csproj" />
       <ProjectReference Include="..\BoardCutter.Core\BoardCutter.Core.csproj" />
-      <ProjectReference Include="..\BoardCutter.Games.Twenty48.Standard\BoardCutter.Games.Twenty48.Standard.csproj" />
     </ItemGroup>
 </Project>

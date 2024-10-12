@@ -4,10 +4,8 @@ using BoardCutter.Core;
 using BoardCutter.Core.Actors;
 using BoardCutter.Core.Exceptions;
 using BoardCutter.Core.Players;
-using BoardCutter.Games.Twenty48.Standard;
 
-
-namespace BoardCutter.Games.Twenty48.Server.Actors;
+namespace BoardCutter.Games.Twenty48;
 
 
 
@@ -66,7 +64,7 @@ public class GameActor : ReceiveActor
 
     private void LeaveGameRequest(GameMessages.LeaveGameRequest message)
     {
-        
+
         if (_owner == null)
         {
             throw new InvalidGameStateException("Owner is null");
@@ -78,7 +76,7 @@ public class GameActor : ReceiveActor
                 "Only the game creator can setup game properties"));
             return;
         }
-        
+
         Context.Parent.Tell(new GameManagerNotifications.GameEnded(GetBaseDetails()));
     }
 
@@ -218,7 +216,7 @@ public class GameActor : ReceiveActor
 
         if (testCell != null)
         {
-            if (testCell.Value == cell.Value && ! testCell.Destroy)
+            if (testCell.Value == cell.Value && !testCell.Destroy)
             {
                 return true;
             }
@@ -230,7 +228,7 @@ public class GameActor : ReceiveActor
     private static bool IsGameOver(Dictionary<int, NumberCell> grid, int gridSize)
     {
         var jaggedArray = GridExtensions.ToJaggedArray(grid, gridSize);
-        
+
         for (int y = 0; y < jaggedArray.Length; y++)
         {
             for (int x = 0; x < jaggedArray[y].Length; x++)

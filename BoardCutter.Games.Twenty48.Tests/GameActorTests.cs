@@ -3,9 +3,6 @@ using Akka.TestKit.Xunit2;
 
 using BoardCutter.Core;
 using BoardCutter.Core.Actors;
-using BoardCutter.Games.Twenty48.Server;
-using BoardCutter.Games.Twenty48.Server.Actors;
-using BoardCutter.Games.Twenty48.Standard;
 
 using static BoardCutter.Core.Tests.TestDataSetup;
 

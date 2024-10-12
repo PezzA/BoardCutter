@@ -1,4 +1,4 @@
-﻿namespace BoardCutter.Games.Twenty48.Standard;
+﻿namespace BoardCutter.Games.Twenty48;
 
 public enum Direction
 {

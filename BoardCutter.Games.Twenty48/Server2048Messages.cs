@@ -1,6 +1,6 @@
 ﻿using System.Runtime.Serialization;
 
-namespace BoardCutter.Games.Twenty48.Standard;
+namespace BoardCutter.Games.Twenty48;
 
 public static class Server2048Messages
 {
