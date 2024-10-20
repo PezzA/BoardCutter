@@ -1,0 +1,35 @@
+﻿@using Umbraco.Cms.Web.Common.PublishedModels;
+@inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage<ContentModels.CSsgridTest>
+@using ContentModels = Umbraco.Cms.Web.Common.PublishedModels;
+@{
+    Layout = "MasterPage.cshtml";
+}
+
+@section PageTitle { Css Grid Test 1}
+<style>
+.grid-container {
+    display: grid;
+    width: 425px;
+    height:425px;
+    align-content: center;
+    grid-template-columns: 100px 100px 100px 100px;
+    grid-template-rows: 100px 100px 100px 100px;
+    background-color:brown;
+    justify-content: space-evenly;
+    gap:5px;
+}
+
+.grid-item {
+    background-color:gray;
+    text-align: center;
+    padding: 25px;
+    font-size: 30px;
+    transition: 2s
+}
+</style>
+
+<div class="grid-container">
+  <div class="grid-item" style="grid-column-start: 1;grid-column-end: 2;">1</div>
+</div>
+
+
