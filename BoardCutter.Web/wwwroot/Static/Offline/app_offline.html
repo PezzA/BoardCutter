@@ -1,0 +1,168 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nautical Games - Coming Soon</title>
+    <style>
+        /* Base styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body, html {
+            height: 100%;
+            overflow-x: hidden;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        body {
+            background-color: #001f3f;
+            color: white;
+        }
+
+        .parallax {
+            position: relative;
+            height: 100vh;
+            overflow-x: hidden;
+            overflow-y: auto;
+        }
+
+        .parallax-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background-repeat: repeat-x;
+            background-position: bottom;
+            z-index: -1;
+        }
+
+        .layer1 {
+            background-image: url('wave-background-1.svg'); /* Create or source a wave SVG */
+            background-size: 150%;
+            animation: moveWavesBackAndForth 20s ease-in-out infinite;
+        }
+
+        .layer2 {
+            background-image: url('wave-background-2.svg'); /* Another wave layer */
+            background-size: 135%;
+            animation: moveWavesBackAndForth 15s ease-in-out infinite;
+            opacity: 0.5;
+        }
+
+        .layer3 {
+            background-image: url('wave-background-3.svg'); /* Another wave layer */
+            background-size: 120%;
+            animation: moveWavesBackAndForth 10s ease-in-out infinite;
+            opacity: 0.75;
+        }
+
+        @keyframes moveWavesBackAndForth {
+            0% {
+                background-position-x: 0;
+            }
+
+            50% {
+                background-position-x: 20%; /* Moves the waves to the right */
+            }
+
+            100% {
+                background-position-x: 0; /* Returns the waves back to the left */
+            }
+        }
+
+        /* Content Container */
+        .container {
+            position: relative;
+            z-index: 10;
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+            padding-top: 100px;
+        }
+
+        .header {
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            font-size: 3rem;
+            color: #2ecc71;
+        }
+
+        p.tagline {
+            color: #f0e68c;
+        }
+
+        .signup-form input, .signup-form button {
+            padding: 10px;
+            border-radius: 5px;
+            border: none;
+        }
+
+        .signup-form input {
+            width: 70%;
+            margin-right: 10px;
+        }
+
+        .signup-form button {
+            background-color: #2ecc71;
+            color: white;
+            cursor: pointer;
+            padding: 10px 20px;
+        }
+
+            .signup-form button:hover {
+                background-color: #27ae60;
+            }
+
+        .footer {
+            margin-top: 40px;
+            color: #f0e68c;
+        }
+
+        .social-links a {
+            color: #f0e68c;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+
+            .social-links a:hover {
+                color: #2ecc71;
+            }
+    </style>
+</head>
+<body>
+    <!-- Parallax Container -->
+    <div class="parallax">
+        <div class="parallax-layer layer1"></div>
+
+        <div class="parallax-layer layer2"></div>
+
+        <div class="parallax-layer layer3"></div>
+        <!-- Layer 3 (foreground content) -->
+        <div class="container">
+            <header class="header">
+
+            </header>
+
+            <main>
+                <div class="intro">
+                    <h2>Coming Soon</h2>
+                    <p>Our crew is hard at work crafting a collection of exciting games for seafarers and landlubbers alike. Join us on launch day for a journey you won't want to miss!</p>
+                </div>
+
+         
+            </main>
+
+            <footer class="footer">
+
+            </footer>
+        </div>
+    </div>
+</body>
+</html>

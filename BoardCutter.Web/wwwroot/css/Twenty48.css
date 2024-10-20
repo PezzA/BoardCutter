@@ -1,3 +1,131 @@
+
+/*
+    This is query container for the overall game area
+*/
+#gameContainer {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    container: gameArea / inline-size;
+}
+
+/* 
+    Wraps all the game elements.  Will contain various controls and displays
+    one of which will be the main game baard.
+*/
+#gameArea {}
+
+/* 
+    This main interactive part of the game, holds all absolutely
+    positioned items.
+*/
+#gameBoard {
+    position: relative;
+    background-color: #bbada0;
+    opacity: 1;
+}
+
+/*
+    Area Items.  Anything is that is happening out of the game board.
+    These items should reserve layout space and will appear above/below.
+*/
+#score {
+    top: 0px;
+    font-weight: bold;
+    font-size: 24px;
+}
+
+/*
+    Board Items.  Anything this is happening inside of the game board.
+    Anything in here is expected to be absolutely positioned.
+*/
+
+
+#cells {}
+
+#gameOver {
+    position:absolute;
+    top:45%;
+    left: 0%;
+
+    width:100%;
+    z-index:1000;
+
+    text-align: center;
+    color: black;
+    font-weight: bolder;
+    font-size: 24pt;
+    
+    transition-duration: 4s;
+    opacity: 0;
+}
+
+
+/* Small */
+@container gameArea (width < 576px) {
+    .gamearea {
+        border: 1pt solid red;
+        width: 500px;
+        min-width: 500px;
+    }
+
+    #gameBoard {
+        width: 500px;
+        height: 500px;
+    }
+
+    .cell {
+        width: 116px;
+        height: 116px;
+        border-radius: 10px;
+        font-size: 24pt;
+    }
+}
+
+/* Medium */
+@container gameArea (width >= 576px) {
+    .gamearea {
+        width: 690px;
+        height: 690px;
+    }
+
+    #gameBoard {
+        width: 690px;
+        height: 690px;
+    }
+
+    .cell {
+        width: 158px;
+        height: 158px;
+        border-radius: 10px;
+        font-size: 30pt;
+    }
+}
+
+
+/* Large */
+@container gameArea (width >= 768px) {
+    .gamearea {
+        width: 900px;
+        height: 900px;
+    }
+
+    #gameBoard {
+        width: 900px;
+        height: 900px;
+    }
+
+    .cell {
+        width: 205px;
+        height: 205px;
+        border-radius: 10px;
+        font-size: 42pt;
+    }
+}
+
+
 @keyframes slidein {
     0% {
         scale: 0 0;
@@ -17,77 +145,6 @@
     height: 24px;
 }
 
-#gameArea {
-    position: relative;
-    //border: 1px solid red;
-    container-type: inline-size;
-    min-width: 200px;
-}
-
-@container (min-width: 0px) {
-    #gameBoard {
-        width: 340px;
-        height: 340px;
-        margin: 5px 0 0 -170px;
-    }
-
-    #debug {
-        background-color: red;
-    }
-
-    .cell {
-        height: 79px;
-        width: 79px;
-        font-size: 32px;
-        border-radius: 8px;
-    }
-}
-
-
-@container (min-width: 500px) {
-    #gameBoard {
-        width: 490px;
-        height: 490px;
-        margin: 20px 0 0 -245px;
-    }
-
-    #debug {
-        background-color: darkgreen;
-    }
-
-    .cell {
-        height: 110px;
-        width: 110px;
-        font-size: 36px;
-        border-radius: 7px;
-    }
-}
-
-@container (min-width: 800) {
-    #gameBoard {
-        width: 370px;
-        height: 370px;
-        margin: 20px 0 0 -185px;
-    }
-
-    #debug {
-        background-color: rebeccapurple;
-    }
-
-    .cell {
-        height: 80px;
-        width: 80px;
-        font-size: 36px;
-        border-radius: 7px;
-    }
-}
-
-#gameBoard {
-    position: relative;
-    background-color: #bbada0;
-    top: 50%;
-    left: 50%;
-}
 
 .cell {
     position: absolute;
@@ -98,6 +155,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    aspect-ratio: auto 1 / 1;
 }
 
 .cell-0 {
@@ -143,7 +201,7 @@
 }
 
 .logInfo {
-    background-color:blue;
+    background-color: blue;
     color: white;
 }
 
@@ -180,11 +238,6 @@
 
 
 #debugLog p {
-    margin:0;
-    padding:5px;
-}
-
-#score {
-    font-size:36pt;
-    font-weight: bolder;
+    margin: 0;
+    padding: 5px;
 }

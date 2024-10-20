@@ -38,15 +38,17 @@ function logDebug(text) {
     logText(text, "Debug");
 }
 
-function ShowStart(showStart, showRunning) {
-    document.getElementById('newGame').hidden = showStart ? '' : 'hidden';
-    document.getElementById('runningGame').hidden = showRunning ? '' : 'hidden';
-}
-
 window.Twenty48 = {
     connection: {},
+    toastHandler: {},
     setReady: {},
     gameId: '',
+    elements: {},
+
+    showStart: (showStart, showRunning) => {
+        window.Twenty48.elements.newGame.hidden = showStart ? '' : 'hidden';
+        window.Twenty48.elements.gameContainer.hidden = showRunning ? '' : 'hidden';
+    },
 
     startGame: () => {
         logUp("StartNew:");
@@ -70,6 +72,11 @@ window.Twenty48 = {
                 logDown("PlayerStatus: " + message);
             });
 
+        connection
+            .on("ErrorMessage", function (message) {
+                logError("ErrorMessage: " + message);
+                window.Twenty48.toastHandler(message);
+            });
         // register our callbacks when the hub sends us an event
         connection
             .on("SetPlayerGame", function (message) {
@@ -84,9 +91,21 @@ window.Twenty48 = {
                 logDown("PublicVisible: " + message);
                 modCells = data.Cells;
 
-                document.getElementById('scoreValue').innerText = data.Score;
+                window.Twenty48.elements.scoreLine.textContent = data.Score;
+
                 drawCells();
                 logDebug('PubVisible: Done');
+
+                if (data.Status === 3) {
+                    logDebug('End of Game');
+                    window.Twenty48.elements.gameBoard.removeEventListener('touchstart', handleTouchStart);
+                    window.Twenty48.elements.gameBoard.removeEventListener('touchend', handleTouchEnd);
+                    window.Twenty48.elements.gameBoard.style.opacity = "0.3";
+
+                    window.removeEventListener("keydown", handleKeyDown);
+
+                    window.Twenty48.elements.gameOver.style.opacity = "1";
+                }
             });
 
         connection
@@ -109,29 +128,43 @@ window.Twenty48 = {
         window.Twenty48.connection = connection;
     },
 
-    setup: (hubUrl, readyHandler) => {
+    setup: (hubUrl, readyHandler, toastHandler) => {
         window.Twenty48.setReady = readyHandler;
-        
+        window.Twenty48.toastHandler = toastHandler;
+
+        window.Twenty48.elements.newGame = document.getElementById('newGame');
+        window.Twenty48.elements.gameContainer = document.getElementById('gameContainer');
+        window.Twenty48.elements.gameArea = document.getElementById('gameArea');
+        window.Twenty48.elements.gameBoard = document.getElementById('cells');
+
+        window.Twenty48.elements.scoreLine = document.getElementById('scoreValue');
+        window.Twenty48.elements.gameOver = document.getElementById('gameOver');
+        window.Twenty48.elements.layoutData = document.getElementById('layoutData');
+
+
+
         const urlParams = new URLSearchParams(window.location.search);
         const myParam = urlParams.get(GAME_ID_PARAM);
 
         if (myParam) {
             logDebug("GameId, found, showing screen: " + myParam);
             window.Twenty48.gameId = myParam;
-            ShowStart(false, true);
+            window.Twenty48.showStart(false, true);
             initGrid();
         } else {
             logDebug("No GameId found. Showing Setup");
-            ShowStart(true, false);
-       
+            window.Twenty48.showStart(true, false);
+
         }
 
         window.Twenty48.connect(hubUrl, myParam);
+
+        resize(true);
     }
 };
 
-let CELL_WIDTH = 80;
-let CELL_MARGIN = 5;
+let CELL_WIDTH = 0;
+let CELL_MARGIN = 0;
 function toPixels(input) {
     return (input * (CELL_WIDTH + CELL_MARGIN)) + CELL_MARGIN;
 }
@@ -161,7 +194,7 @@ function addCell(id, value, x, y) {
     node.style.top = toPixels(y) + "px";
     node.style.left = toPixels(x) + "px";
 
-    const mainElement = document.getElementById("gameBoard");
+    const mainElement = window.Twenty48.elements.gameBoard;
 
     if (mainElement) {
         mainElement.appendChild(node);
@@ -170,42 +203,58 @@ function addCell(id, value, x, y) {
     }
 }
 
-var prevSize = null;
-var sizeChanged = false;
+var prevSize = '';
+
+function withinOne(val, test) {
+    return Math.abs(val - test) < 1;
+}
 
 function resize(forceDraw) {
-    var bounds = document.getElementById('gameBoard').getBoundingClientRect();
+    var bounds = window.Twenty48.elements.gameContainer.getBoundingClientRect();
+    var sizeChanged = false;
+    const width = bounds.width;
 
-    if (bounds.width == 340 && prevSize != 340) {
-        CELL_WIDTH = 79;
-        CELL_MARGIN = 5;
+    if (width < 517 && prevSize !== 'S') {
+        logDebug('Setting Small');
+        CELL_WIDTH = 116;
+        CELL_MARGIN = 7;
         sizeChanged = true;
-    } else if (bounds.width == 490 && prevSize != 490) {
-        CELL_WIDTH = 110;
-        CELL_MARGIN = 10;
+        prevSize = 'S';
+    } else if (withinOne(width, 696) && prevSize !== 'M') {
+        logDebug('Setting Medium');
+        CELL_WIDTH = 158;
+        CELL_MARGIN = 11;
         sizeChanged = true;
-    } else if (bounds.width == 900 && prevSize != 900) {
-        CELL_WIDTH = 80;
-        CELL_MARGIN = 10;
+        prevSize = 'M';
+    } else if (withinOne(width, 936) && prevSize !== 'L') {
+        logDebug('Setting Large');
+        CELL_WIDTH = 205;
+        CELL_MARGIN = 15;
         sizeChanged = true;
+        prevSize = 'L';
+    } else {
+        if (forceDraw) {
+            logWarn('Did Nothing!' + width);
+        }
     }
 
+    window.Twenty48.elements.layoutData.textContent = `Width: ${width}, Cell Width: ${CELL_WIDTH}, Margin: ${CELL_MARGIN}, PrevSize ${prevSize}`;
+
     if (sizeChanged || forceDraw) {
-        console.log('redraw');
-        prevSize = bounds.width;
-        sizeChanged = false;
 
-        var debugElement = document.getElementById('debugText');
-        debugElement.innerText = `Width: ${bounds.width}, Cell Width: ${CELL_WIDTH}, Margin: ${CELL_MARGIN}`;
+        if (forceDraw) {
+            logDebug("Force Redrawing")
+        } else {
+            logDebug("Redrawing")
+        }
 
-        document.getElementById('gameBoard').innerHTML = '';
+        window.Twenty48.elements.gameBoard.innerHTML = '';
 
         for (let x = 0; x < 4; x++) {
             for (let y = 0; y < 4; y++) {
                 addCell(0, 0, x, y);
             }
         }
-
         drawCells();
     }
 }
@@ -227,42 +276,40 @@ function getDirectionFromKey(key) {
             return -1;
     }
 }
-function initGrid()
-{
+
+function handleKeyDown(e) {
+    if (e.repeat) return;
+
+    if (e.key === "ArrowUp" || e.key === "ArrowDown" || e.key === "ArrowLeft" || e.key === "ArrowRight") {
+        e.preventDefault();
+
+        var decodedKey = getDirectionFromKey(e.key);
+
+        logUp("Move: " + "[GameId:" + window.Twenty48.gameId + "]" + " [Direction:" + decodedKey + "]");
+
+        if (decodedKey !== -1) {
+            window.Twenty48.connection
+                .invoke("Move", window.Twenty48.gameId, decodedKey)
+                .catch(function (err) {
+                    logError("Could not invoke method [Move] on signalR connection." + err.toString());
+                });
+
+            logDebug("Procssing Move: " + decodedKey);
+        }
+    }
+}
+
+function initGrid() {
     logDebug('Initalising Game');
 
     window.addEventListener('resize', function () {
         resize();
     }, true);
 
-
-    const gameBoard = document.getElementById("gameBoard");
-
     // https://stackoverflow.com/questions/2264072/detect-a-finger-swipe-through-javascript-on-the-iphone-and-android
-    gameBoard.addEventListener('touchstart', handleTouchStart, { passive: false });
-    gameBoard.addEventListener('touchend', handleTouchEnd, { passive: false });
-
-    window.addEventListener("keydown", function (e) {
-        if (e.repeat) return;
-
-        if (e.key === "ArrowUp" || e.key === "ArrowDown" || e.key === "ArrowLeft" || e.key === "ArrowRight") {
-            e.preventDefault();
-
-            var decodedKey = getDirectionFromKey(e.key);
-
-            logUp("Move: " + "[GameId:" + window.Twenty48.gameId + "]" + " [Direction:" + decodedKey + "]");
-
-            if (decodedKey !== -1) {
-                window.Twenty48.connection
-                    .invoke("Move", window.Twenty48.gameId, decodedKey)
-                    .catch(function (err) {
-                        logError("Could not invoke method [Move] on signalR connection." + err.toString());
-                    });
-
-                logDebug("Procssing Move: " + decodedKey);
-            }
-        }
-    });
+    window.Twenty48.elements.gameBoard.addEventListener('touchstart', handleTouchStart);
+    window.Twenty48.elements.gameBoard.addEventListener('touchend', handleTouchEnd);
+    window.addEventListener("keydown", handleKeyDown);
 
     resize(true);
 };
