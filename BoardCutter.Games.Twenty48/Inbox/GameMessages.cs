@@ -1,6 +1,7 @@
 ﻿using BoardCutter.Core.Players;
+using BoardCutter.Games.Twenty48.Game;
 
-namespace BoardCutter.Games.Twenty48;
+namespace BoardCutter.Games.Twenty48.Inbox;
 
 public class GameMessages
 {

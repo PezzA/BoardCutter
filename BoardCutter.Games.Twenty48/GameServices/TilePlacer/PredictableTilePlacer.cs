@@ -1,7 +1,8 @@
 ﻿using BoardCutter.Core;
 using BoardCutter.Core.Exceptions;
+using BoardCutter.Games.Twenty48.Game;
 
-namespace BoardCutter.Games.Twenty48;
+namespace BoardCutter.Games.Twenty48.GameServices.TilePlacer;
 
 /// <summary>
 /// Predictable Tile Placer will always put a 2 in the first available slot reading from left to right, top to bottom

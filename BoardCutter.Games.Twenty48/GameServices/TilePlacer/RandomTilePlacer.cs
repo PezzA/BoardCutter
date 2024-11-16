@@ -1,7 +1,8 @@
 ﻿using BoardCutter.Core;
 using BoardCutter.Core.Exceptions;
+using BoardCutter.Games.Twenty48.Game;
 
-namespace BoardCutter.Games.Twenty48;
+namespace BoardCutter.Games.Twenty48.GameServices.TilePlacer;
 
 /// <summary>
 /// Random Tile Placer will place a tile in any available cell, 80% change of a 2, 20% change of a 4.

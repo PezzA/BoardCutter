@@ -4,8 +4,11 @@ using BoardCutter.Core;
 using BoardCutter.Core.Actors;
 using BoardCutter.Core.Exceptions;
 using BoardCutter.Core.Players;
+using BoardCutter.Games.Twenty48.GameServices.TilePlacer;
+using BoardCutter.Games.Twenty48.Inbox;
+using BoardCutter.Games.Twenty48.Outbox;
 
-namespace BoardCutter.Games.Twenty48;
+namespace BoardCutter.Games.Twenty48.Game;
 
 
 
@@ -145,7 +148,7 @@ public class GameActor : ReceiveActor
         {
             _hubWriterActor.Tell(new HubWriterMessages.WriteClientObject(
                 _owner,
-                Server2048Messages.ErrorMessage,
+                MessagesTypes.ErrorMessage,
                 "Only the game oweer can make a move"));
             return;
         }
@@ -154,7 +157,7 @@ public class GameActor : ReceiveActor
         {
             _hubWriterActor.Tell(new HubWriterMessages.WriteClientObject(
                 _owner,
-                Server2048Messages.ErrorMessage,
+                MessagesTypes.ErrorMessage,
                 "Game is complete and no more moves can be played"));
             return;
         }
@@ -437,7 +440,7 @@ public class GameActor : ReceiveActor
         }
 
         _hubWriterActor.Tell(new HubWriterMessages.WriteClientObject(_owner,
-            Server2048Messages.PublicVisible,
+            MessagesTypes.PublicVisible,
             GetPublicVisibleData()));
     }
 }

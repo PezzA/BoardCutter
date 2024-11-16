@@ -3,6 +3,8 @@ using Akka.Hosting;
 
 using BoardCutter.Core.Actors;
 using BoardCutter.Core.Players;
+using BoardCutter.Games.Twenty48.Game;
+using BoardCutter.Games.Twenty48.Inbox;
 
 using Microsoft.AspNetCore.SignalR;
 

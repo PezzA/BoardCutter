@@ -1,4 +1,5 @@
 using BoardCutter.Core;
+using BoardCutter.Games.Twenty48.Game;
 
 namespace BoardCutter.Games.Twenty48.Tests;
 

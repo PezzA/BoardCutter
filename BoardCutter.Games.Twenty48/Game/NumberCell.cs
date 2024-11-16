@@ -1,6 +1,6 @@
 ﻿using BoardCutter.Core;
 
-namespace BoardCutter.Games.Twenty48
+namespace BoardCutter.Games.Twenty48.Game
 {
     public record NumberCell(int Id, int Value, Point2D Point, bool New, bool Destroy);
 }

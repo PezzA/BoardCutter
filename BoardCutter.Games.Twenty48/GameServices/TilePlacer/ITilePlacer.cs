@@ -1,6 +1,7 @@
 ﻿using BoardCutter.Core;
+using BoardCutter.Games.Twenty48.Game;
 
-namespace BoardCutter.Games.Twenty48;
+namespace BoardCutter.Games.Twenty48.GameServices.TilePlacer;
 
 public interface ITilePlacer
 {

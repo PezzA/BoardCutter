@@ -5,6 +5,7 @@ using BoardCutter.Core.Actors;
 using BoardCutter.Core.Actors.HubWriter;
 using BoardCutter.Core.Players;
 using BoardCutter.Games.Twenty48;
+using BoardCutter.Games.Twenty48.GameServices.TilePlacer;
 
 using Microsoft.AspNetCore.SignalR;
 
@@ -36,7 +37,7 @@ builder.Services.AddAkka("MyActorSystem", configurationBuilder =>
             {
                 {
                     "2048",
-                    Props.Create(() =>  new BoardCutter.Games.Twenty48.GameActor(twenty48HubWriter, new RandomTilePlacer()))
+                    Props.Create(() =>  new BoardCutter.Games.Twenty48.Game.GameActor(twenty48HubWriter, new RandomTilePlacer()))
                 }
             };
 

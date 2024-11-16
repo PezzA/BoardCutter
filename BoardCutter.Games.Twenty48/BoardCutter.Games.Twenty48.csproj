@@ -1,17 +1,21 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
-        <TargetFramework>net8.0</TargetFramework>
+        <TargetFramework>net9.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Akka" Version="1.5.18" />
-      <PackageReference Include="Akka.Hosting" Version="1.5.18" />
+      <PackageReference Include="Akka" Version="1.5.31" />
+      <PackageReference Include="Akka.Hosting" Version="1.5.31.1" />
     </ItemGroup>
 
     <ItemGroup>
       <ProjectReference Include="..\BoardCutter.Core.Actors\BoardCutter.Core.Actors.csproj" />
       <ProjectReference Include="..\BoardCutter.Core\BoardCutter.Core.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Hub\" />
     </ItemGroup>
 </Project>
