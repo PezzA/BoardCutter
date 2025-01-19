@@ -1,101 +1,114 @@
 ﻿@using Umbraco.Cms.Web.Common.PublishedModels;
 @inherits Umbraco.Cms.Web.Common.Views.UmbracoViewPage<ContentModels.Twenty48>
-@using ContentModels = Umbraco.Cms.Web.Common.PublishedModels;
-@{
-    Layout = "MasterPage.cshtml";
-}
+  @using ContentModels = Umbraco.Cms.Web.Common.PublishedModels;
+  @{
+  Layout = "MasterPage.cshtml";
+  }
 
-@section PageTitle
-{
-    Model.Value("pageTitle")
-}
+  @section PageTitle
+  {
+  Model.Value("pageTitle")
+  }
 
-@section StyleSheetIncludes {
-    <link href="/css/Twenty48.css" rel="stylesheet">
-}
+  @section StyleSheetIncludes {
+  <link href="/css/Twenty48.css" rel="stylesheet">
+  }
 
-@section Breadcrumbs {
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="/">BoardCutter</a></li>
-            <li class="breadcrumb-item"><a href="/Games">Games</a></li>
-            <li class="breadcrumb-item active" aria-current="page">2048</li>
-        </ol>
-    </nav>
-}
+  @section Breadcrumbs {
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="/">BoardCutter</a></li>
+      <li class="breadcrumb-item"><a href="/Games">Games</a></li>
+      <li class="breadcrumb-item active" aria-current="page">2048</li>
+    </ol>
+  </nav>
+  }
 
-<div id="newGame" hidden="hidden">
+  <div id="newGame" hidden="hidden">
     @Model.Value("content")
-    <button id="startGame" class="w-100 btn btn-lg btn-primary" onclick="window.Twenty48.startGame()" disabled="disabled">@Model.Value("buttonTextLoading")</button>
-</div>
+    <button id="startGame" class="w-100 btn btn-lg btn-primary" onclick="window.twenty48Game.startGame()"
+      disabled="disabled">@Model.Value("buttonTextLoading")</button>
+  </div>
 
-<div id="gameContainer" hidden="hidden">
+  <div id="gameContainer" hidden="hidden">
     <div id="gameArea">
-        <div id="score">Score: <span id="scoreValue"></span></div>
-        <div id="gameBoard">
-            <div id="cells"></div>
-            <div id="gameOver">Game Over</div>
-        </div>
+      <div id="score">Score: <span id="scoreValue"></span></div>
+      <div id="gameBoard">
+        <div id="cells"></div>
+        <div id="gameOver">Game Over</div>
+      </div>
     </div>
-</div>
+  </div>
 
-<div id="debugArea" class="accordion" id="accordionExample" style="margin-top:50px">
+  <div id="debugArea" class="accordion" id="accordionExample" style="margin-top:50px">
     <div class="accordion-item">
-        <h2 class="accordion-header">
-            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseTwo">
-                Layout Data
-            </button>
-        </h2>
-        <div id="collapseOne" class="accordion-collapse collapse">
-            <div class="accordion-body">
-                <div id="layoutData">
-                </div>
-            </div>
+      <h2 class="accordion-header">
+        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne"
+          aria-expanded="true" aria-controls="collapseTwo">
+          Layout Data
+        </button>
+      </h2>
+      <div id="collapseOne" class="accordion-collapse collapse">
+        <div class="accordion-body">
+          <div id="layoutData">
+          </div>
         </div>
+      </div>
     </div>
     <div class="accordion-item">
-        <h2 class="accordion-header">
-            <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="true" aria-controls="collapseTwo">
-                Debug Log
-            </button>
-        </h2>
-        <div id="collapseTwo" class="accordion-collapse collapse">
-            <div class="accordion-body">
-                <div id="debugLog">
-                </div>
-            </div>
+      <h2 class="accordion-header">
+        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo"
+          aria-expanded="true" aria-controls="collapseTwo">
+          Debug Log
+        </button>
+      </h2>
+      <div id="collapseTwo" class="accordion-collapse collapse">
+        <div class="accordion-body">
+          <div id="debugLog">
+          </div>
         </div>
+      </div>
     </div>
-</div>
+  </div>
 
 
-<div class="toast-container position-fixed top-50 start-50 translate-middle p-3">
-    <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-bs-autohide="true" data-bs-delay="5000" data-bs-animation="true">
-        <div class="toast-header">
-            <strong class="me-auto">Oops!</strong>
-            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-        </div>
-        <div class="toast-body" id="errorMessageBody">
-        </div>
+  <div class="toast-container position-fixed top-50 start-50 translate-middle p-3">
+    <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-bs-autohide="true"
+      data-bs-delay="5000" data-bs-animation="true">
+      <div class="toast-header">
+        <strong class="me-auto">Oops!</strong>
+        <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+      </div>
+      <div class="toast-body" id="errorMessageBody">
+      </div>
     </div>
-</div>
+  </div>
 
-<script type="text/javascript" src="/umbraco/lib/signalr/signalr.min.js"></script>
-<script type="text/javascript" src="/scripts/games/Twenty48.js"></script>
+  <script type="text/javascript" src="/bundle.js"></script>
 
-<script>
+  <script>
     const toastLiveExample = document.getElementById('liveToast');
 
     document.addEventListener("DOMContentLoaded", function () {
-        window.Twenty48.setup('/Twenty48Hub', 
-            () => {
-                const startElement = document.getElementById('startGame');
-                startElement.innerText = "@Model.Value("buttonTextReady")";
-                startElement.disabled = ""; }, 
-            (errorMessage) => {
-                document.getElementById('errorMessageBody').textContent = errorMessage;
-                const toastBootstrap = bootstrap.Toast.getOrCreateInstance(toastLiveExample);
-                toastBootstrap.show();
-            });
+      window.twenty48Game.initGame("score",
+        "debugLog",
+        "gameBoard",
+        "newGame",
+        "gameContainer",
+        "gameArea",
+        "gameOver",
+        "layoutData",
+        "debugLog",
+        () => {
+          console.log('ready called');
+          const startElement = document.getElementById('startGame');
+          startElement.innerText = "@Model.Value("buttonTextReady")";
+          startElement.disabled = "";
+        },
+        (errorMessage) => {
+          document.getElementById('errorMessageBody').textContent = errorMessage;
+          const toastBootstrap = bootstrap.Toast.getOrCreateInstance(toastLiveExample);
+          toastBootstrap.show();
+        });
     });
-</script>
+  </script>

@@ -104,6 +104,11 @@ public class GameActor : ReceiveActor
 
         Context.Sender.Tell(new GameManagerNotifications.GameCreated(GetBaseDetails()));
 
+        _hubWriterActor.Tell(new HubWriterMessages.WriteClientObject(
+            _owner,
+            "SetPlayerGame",
+            GetPublicVisibleData()));
+
         BroadCastVisible();
     }
 
