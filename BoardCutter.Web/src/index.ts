@@ -28,12 +28,10 @@ export function startGame(scoreLineElementId: string,
     };
 
     game = new Twenty48(windowElements, readyFunc, toastFunc);
-
     game.setup();
 }
 
 function getElementAndThrow(elementId: string): HTMLElement {
-
     const element = document.getElementById(elementId);
 
     if (!element) {
@@ -44,7 +42,6 @@ function getElementAndThrow(elementId: string): HTMLElement {
 }
 
 interface Twenty48Game {
-
     initGame: (scoreLineElementId: string,
         logContainerElementId: string,
         gameBoardElementId: string,

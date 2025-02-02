@@ -26,10 +26,9 @@ export class Twenty48 {
     private addEventListeners(this: Twenty48): void {
         this.removeEventListeners();
 
-
         const classClosure: Twenty48 = this;
 
-        this._keydownHandler = function(this: Window, e: KeyboardEvent) {
+        this._keydownHandler = function (this: Window, e: KeyboardEvent) {
             if (e.repeat) return;
 
             if (e.key === "ArrowUp" || e.key === "ArrowDown" || e.key === "ArrowLeft" || e.key === "ArrowRight") {
@@ -42,7 +41,7 @@ export class Twenty48 {
                 if (decodedKey !== -1) {
                     classClosure.connection
                         .invoke("Move", classClosure.gameId, decodedKey)
-                        .catch(function(err: Error) {
+                        .catch(function (err: Error) {
                             console.log("Could not invoke method [Move] on signalR connection." + err.toString());
                         });
 
@@ -51,7 +50,7 @@ export class Twenty48 {
             }
         }
 
-        this._resizeHanlder = function() {
+        this._resizeHanlder = function () {
             classClosure.resize();
         }
 
@@ -67,7 +66,7 @@ export class Twenty48 {
         window.removeEventListener("keydown", this._keydownHandler);
     }
 
-    constructor(elements: WindowElements, readyHandler: () => void, toastHandler: (message: string) => void ) {
+    constructor(elements: WindowElements, readyHandler: () => void, toastHandler: (message: string) => void) {
         this.windowElements = elements;
         this._readyHandler = readyHandler;
         this._toastHandler = toastHandler;
@@ -90,21 +89,21 @@ export class Twenty48 {
         }
 
         this.connect(myParam);
-
-       // this.resize(true);
+        // this.resize(true);
     }
 
-    public startGame(this:Twenty48): void {
+    public startGame(this: Twenty48): void {
         this.logger.logUp("StartNew:");
 
         const that = this;
         this.connection
             .invoke("StartNew")
-            .catch(function(err:Error){
+            .catch(function (err: Error) {
                 that.logger.logError(`Could not invoke StartNew on signalR Connection. Error : ${err.message}`);
             });
 
     }
+
     connect(this: Twenty48, gameId: string): void {
         const connection = new signalR.HubConnectionBuilder()
             .withUrl(GAME_HUB_URL)
@@ -118,18 +117,18 @@ export class Twenty48 {
 
         connection
             .start()
-            .then(function() {
+            .then(function () {
                 that.logger.logSuccess("SignalR Connection Established");
                 that._readyHandler();
 
                 that.logger.logUp(`CheckPlayerStatus: ${gameId ?? ""}`);
                 that.connection
                     .invoke("CheckPlayerStatus", gameId ?? "")
-                    .catch(function(err) {
+                    .catch(function (err) {
                         that.logger.logError("Could not invoke method [] on signalR connection." + err.toString());
                     });
             })
-            .catch(function(err) {
+            .catch(function (err) {
                 that.logger.logError("could not establish a signalR connection." + err.toString());
             });
 
@@ -138,23 +137,23 @@ export class Twenty48 {
 
     configureHandlers(this: Twenty48, conn: signalR.HubConnection): signalR.HubConnection {
         const that = this;
-        conn.on("PlayerStatus", function(message: string) {
+        conn.on("PlayerStatus", function (message: string) {
             that.logger.logDown("PlayerStatus: " + message);
         });
 
-        conn.on("ErrorMessage", function(message: string) {
+        conn.on("ErrorMessage", function (message: string) {
             that.logger.logError("ErrorMessage: " + message);
             that._toastHandler(message);
         });
 
         conn
-            .on("SetPlayerGame", function(message: string) {
+            .on("SetPlayerGame", function (message: string) {
                 var data = JSON.parse(message);
                 that.logger.logDown("SetPlayerGame: " + message);
                 window.location.href += `?gameid=` + data.GameId;
             });
 
-        conn.on("PublicVisible", function(message: string) {
+        conn.on("PublicVisible", function (message: string) {
             var data = JSON.parse(message);
             that.logger.logDown("PublicVisible: " + message);
             that._modCells = data.Cells;
@@ -304,7 +303,7 @@ export class Twenty48 {
             if (decodedKey !== -1) {
                 this.connection
                     .invoke("Move", this.gameId, decodedKey)
-                    .catch(function(this: Twenty48, err: Error) {
+                    .catch(function (this: Twenty48, err: Error) {
                         this.logger.logError("Could not invoke method [Move] on signalR connection." + err.toString());
                     });
 
@@ -374,7 +373,7 @@ export class Twenty48 {
         if (dir !== -1) {
             this.connection
                 .invoke("Move", this.gameId, dir)
-                .catch(function(this: Twenty48, err: Error) {
+                .catch(function (this: Twenty48, err: Error) {
                     this.logger.logError("Could not invoke method [Move] on signalR connection." + err.toString());
                 });
 
@@ -404,7 +403,7 @@ export class Twenty48 {
         });
 
         const that = this;
-        setTimeout(function(this: Twenty48) {
+        setTimeout(function (this: Twenty48) {
             that._modCells.forEach((cell: any) => {
                 if (cell.Destroy) {
                     const deleteCell = document.getElementById(that.getCellId(cell.Id));
