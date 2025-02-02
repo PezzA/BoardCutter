@@ -1,5 +1,5 @@
 import * as signalR from "@microsoft/signalr";
-import { Logger } from "./logger";
+import { Logger } from "../logger";
 import { WindowElements } from "./WindowElements";
 
 const GAME_ID_PARAM = "gameid";

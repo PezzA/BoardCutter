@@ -1,9 +1,9 @@
-import { Twenty48 } from "./game";
-import { WindowElements } from "./WindowElements"
+import { Twenty48 } from "./2048/game";
+import { WindowElements } from "./2048/WindowElements"
 
-var game: Twenty48 | undefined = undefined;
+var twenty48Game: Twenty48 | undefined = undefined;
 
-export function startGame(scoreLineElementId: string,
+export function start2048Game(scoreLineElementId: string,
     logContainerElementId: string,
     gameBoardElementId: string,
     newGameElementId: string,
@@ -27,8 +27,8 @@ export function startGame(scoreLineElementId: string,
         debugLog: getElementAndThrow(debuglogElementId)
     };
 
-    game = new Twenty48(windowElements, readyFunc, toastFunc);
-    game.setup();
+    twenty48Game = new Twenty48(windowElements, readyFunc, toastFunc);
+    twenty48Game.setup();
 }
 
 function getElementAndThrow(elementId: string): HTMLElement {
@@ -63,14 +63,14 @@ declare global {
 }
 
 window.twenty48Game = {
-    initGame: startGame,
+    initGame: start2048Game,
     startGame: () => {
-        if (!game) {
+        if (!twenty48Game) {
             console.error("Twenty48 Game Not Initialised");
             return;
         }
 
-        game.startGame();
+        twenty48Game.startGame();
     }
 }
 
