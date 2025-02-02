@@ -51,31 +51,10 @@ public class GameActor : ReceiveActor
 
         Receive<GameMessages.MoveRequest>(MoveRequest);
 
-        Receive<GameMessages.LeaveGameRequest>(LeaveGameRequest);
-
         Receive<GameMessages.BroadcastRequest>(BroadcastRequest);
     }
 
     private void BroadcastRequest(GameMessages.BroadcastRequest msg) => BroadCastVisible();
-
-    private void LeaveGameRequest(GameMessages.LeaveGameRequest message)
-    {
-
-        if (_owner == null)
-        {
-            throw new InvalidGameStateException("Owner is null");
-        }
-
-        if (message.Player.Id != _owner.Id)
-        {
-            _hubWriterActor.Tell(new HubWriterMessages.WriteClientObject(message.Player, "Error",
-                "Only the game creator can setup game properties"));
-            return;
-        }
-
-        Context.Parent.Tell(new GameManagerNotifications.GameUpdated(GetBaseDetails()));
-
-    }
 
     private void InitNewGame()
     {

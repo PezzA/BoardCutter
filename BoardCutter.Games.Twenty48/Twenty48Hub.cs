@@ -33,6 +33,13 @@ namespace BoardCutter.Games.Twenty48
             return new GetBasicDetailsResult(true, player, gameActorResp.GameActor);
         }
 
+        /// <summary>
+        /// CheckPlayerStatus checks to see if both the player and the game exist.  If so broadcast
+        /// latest status to the game clients.
+        /// </summary>
+        /// <param name="gameId"></param>
+        /// <returns></returns>
+        /// <exception cref="InvalidDataException"></exception>
         public async Task CheckPlayerStatus(string gameId)
         {
             var loggedInUserName = Context.User?.Identity?.Name;
@@ -56,19 +63,10 @@ namespace BoardCutter.Games.Twenty48
             requestDetails.GameActor.Tell(new GameMessages.BroadcastRequest(requestDetails.Player));
         }
 
-        public async Task InitGame(string gameId)
-        {
-            var requestDetails = await GetBasicDetails(gameId);
-
-            if (requestDetails is not { Success: true } ||
-                requestDetails.GameActor is null)
-            {
-                return;
-            }
-
-            requestDetails.GameActor.Tell(new GameMessages.BroadcastRequest(requestDetails.Player));
-        }
-
+        /// <summary>
+        /// Request to start a new game, significantly, this request goes to the game manager to create the game.
+        /// </summary>
+        /// <returns></returns>
         public async Task StartNew()
         {
             var player = await playerService.GetPlayerByConnectionId(Context.ConnectionId);
@@ -81,44 +79,12 @@ namespace BoardCutter.Games.Twenty48
             _gameManagerActor.Tell(new GameManagerMessages.CreateGameRequest(player, "2048"));
         }
 
-        public async Task SetupGame(string gameId, int size)
-        {
-            var requestDetails = await GetBasicDetails(gameId);
-
-            if (requestDetails is not { Success: true } ||
-                requestDetails.GameActor is null)
-            {
-                return;
-            }
-
-            requestDetails.GameActor.Tell(new GameMessages.SetupGameRequest(requestDetails.Player, size));
-        }
-
-        public async Task StartGame(string gameId)
-        {
-            var requestDetails = await GetBasicDetails(gameId);
-
-            if (requestDetails is not { Success: true } ||
-                requestDetails.GameActor is null)
-            {
-                return;
-            }
-
-            requestDetails.GameActor.Tell(new GameMessages.StartGameRequest(requestDetails.Player));
-        }
-
-        public async Task LeaveGame(string gameId)
-        {
-            var requestDetails = await GetBasicDetails(gameId);
-
-            if (requestDetails is not { Success: true } ||
-                requestDetails.GameActor is null)
-            {
-                return;
-            }
-
-            requestDetails.GameActor.Tell(new GameMessages.LeaveGameRequest(requestDetails.Player));
-        }
+        /// <summary>
+        /// Process a move.  Main gameplay logic method
+        /// </summary>
+        /// <param name="gameId"></param>
+        /// <param name="direction"></param>
+        /// <returns></returns>
         public async Task Move(string gameId, Direction direction)
         {
             var requestDetails = await GetBasicDetails(gameId);
