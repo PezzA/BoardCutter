@@ -16,11 +16,25 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 8.0.x
-        
+
+    - name: Setup Node
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20
+
+    - name: Install Deps
+      working-directory: ./BoardCutter.Web
+      run: npm i
+
+    - name: Compile Typescript
+      working-directory: ./BoardCutter.Web
+      run: npm run release
+
     - name: Restore dependencies
       run: dotnet restore
 

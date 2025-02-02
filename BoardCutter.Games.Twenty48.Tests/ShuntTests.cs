@@ -7,11 +7,10 @@ public class ShuntTests
 {
     public static IEnumerable<object[]> GetShuntCellUpData()
     {
-        return new List<object[]>
-        {
+        return
+        [
             // @formatter:off
-            new object[]
-            {
+            [
                 new Dictionary<int, NumberCell>
                 { 
                     {1, new NumberCell(1, 2, new Point2D(0, 3), false, false)}
@@ -23,9 +22,8 @@ public class ShuntTests
                 },
                 true,
                 0
-            },
-            new object[]
-            {
+            ],
+            [
                 new Dictionary<int, NumberCell>
                 { 
                     {1, new NumberCell(1, 2, new Point2D(0, 3), false, false)},
@@ -40,9 +38,9 @@ public class ShuntTests
                 },
                 true,
                 4
-            }
+            ]
             // @formatter:on
-        };
+        ];
     }
 
     [Theory]
@@ -65,11 +63,10 @@ public class ShuntTests
 
     public static IEnumerable<object[]> GetShuntCellDownData()
     {
-        return new List<object[]>
-        {
+        return
+        [
             // @formatter:off
-            new object[]
-            {
+            [
                 new Dictionary<int, NumberCell>
                 { 
                     {1, new NumberCell(1, 2, new Point2D(0, 0), false, false)}
@@ -81,9 +78,8 @@ public class ShuntTests
                 },
                 true,
                 0
-            },
-            new object[]
-            {
+            ],
+            [
                 new Dictionary<int, NumberCell>
                 { 
                     {1, new NumberCell(1, 2, new Point2D(0, 1), false, false)},
@@ -98,9 +94,9 @@ public class ShuntTests
                 },
                 true,
                 4
-            }
+            ]
             // @formatter:on
-        };
+        ];
     }
 
     [Theory]
@@ -123,11 +119,10 @@ public class ShuntTests
 
     public static IEnumerable<object[]> GetShuntCellLeftData()
     {
-        return new List<object[]>
-        {
+        return
+        [
             // @formatter:off
-            new object[]
-            {
+            [
                 new Dictionary<int, NumberCell>
                 { 
                     {1, new NumberCell(1, 2, new Point2D(3, 0), false, false)}
@@ -139,9 +134,8 @@ public class ShuntTests
                 },
                 true,
                 0
-            },
-            new object[]
-            {
+            ],
+            [
                 new Dictionary<int, NumberCell>
                 { 
                     {1, new NumberCell(1, 2, new Point2D(3, 0), false, false)},
@@ -156,9 +150,9 @@ public class ShuntTests
                 },
                 true,
                 4
-            }
+            ]
             // @formatter:on
-        };
+        ];
     }
 
     [Theory]
@@ -181,11 +175,10 @@ public class ShuntTests
 
     public static IEnumerable<object[]> GetShuntCellRightData()
     {
-        return new List<object[]>
-        {
+        return
+        [
             // @formatter:off
-            new object[]
-            {
+            [
                 new Dictionary<int, NumberCell>
                 { 
                     {1, new NumberCell(1, 2, new Point2D(0, 0), false, false)}
@@ -197,9 +190,8 @@ public class ShuntTests
                 },
                 true,
                 0
-            },
-            new object[]
-            {
+            ],
+            [
                 new Dictionary<int, NumberCell>
                 { 
                     {1, new NumberCell(1, 2, new Point2D(0, 0), false, false)},
@@ -214,9 +206,9 @@ public class ShuntTests
                 },
                 true,
                 4
-            }
+            ]
             // @formatter:on
-        };
+        ];
     }
 
     [Theory]
@@ -239,11 +231,10 @@ public class ShuntTests
 
     public static IEnumerable<object[]> GetShuntCellData()
     {
-        return new List<object[]>
-        {
+        return
+        [
             // @formatter:off
-            new object[]
-            {
+            [
                 1,
                 new Dictionary<int, NumberCell>
                 { 
@@ -258,9 +249,8 @@ public class ShuntTests
                 },
                 true,
                 0
-            },
-            new object[]
-            {
+            ],
+            [
                 1,
                 new Dictionary<int, NumberCell>
                 { 
@@ -278,9 +268,9 @@ public class ShuntTests
                 },
                 true,
                 4
-            }
+            ]
             // @formatter:on
-        };
+        ];
     }
 
     [Theory]

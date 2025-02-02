@@ -7,18 +7,17 @@ using BoardCutter.Core.Players;
 
 namespace BoardCutter.Games.Twenty48;
 
-
-
 public class GameActor : ReceiveActor
 {
     private Player? _owner;
     private string _gameId = Guid.NewGuid().ToString();
-    private int _gridSize = 4;
+    private readonly int _gridSize = 4;
     private Dictionary<int, NumberCell> _cells = [];
     private int _score;
+    private GameStatus _gameStatus = GameStatus.SettingUp;
     private readonly IActorRef _hubWriterActor;
     private readonly ITilePlacer _tilePlacer;
-    private GameStatus _gameStatus = GameStatus.SettingUp;
+
 
     private static int GetNextId(Dictionary<int, NumberCell> grid)
     {
@@ -36,12 +35,9 @@ public class GameActor : ReceiveActor
 
     private GameManagerNotifications.BaseGameNotification GetBaseDetails()
     {
-        if (_owner == null)
-        {
-            throw new InvalidGameStateException("No Owner detected");
-        }
-
-        return new(_gameId, "2048", "2048", _gameStatus, [_owner]);
+        return _owner == null
+            ? throw new InvalidGameStateException("No Owner detected")
+            : new(_gameId, "2048", "2048", _gameStatus, [_owner]);
     }
 
     public GameActor(IActorRef hubWriterActor, ITilePlacer tilePlacer)
@@ -49,14 +45,14 @@ public class GameActor : ReceiveActor
         _hubWriterActor = hubWriterActor;
         _tilePlacer = tilePlacer;
 
-        // 'Generic' Messages
+        // CreateGameSpecificRequest is a request from the gane manger to create the game.
+        // For 2048 this will also fire start game (there is no setup).
         Receive<GameManagerMessages.CreateGameSpecificRequest>(CreateGame);
 
-        // Game Specific Messages
-        Receive<GameMessages.SetupGameRequest>(SetupRequest);
-        Receive<GameMessages.StartGameRequest>(StartGameRequest);
-        Receive<GameMessages.LeaveGameRequest>(LeaveGameRequest);
         Receive<GameMessages.MoveRequest>(MoveRequest);
+
+        Receive<GameMessages.LeaveGameRequest>(LeaveGameRequest);
+
         Receive<GameMessages.BroadcastRequest>(BroadcastRequest);
     }
 
@@ -77,31 +73,14 @@ public class GameActor : ReceiveActor
             return;
         }
 
-        Context.Parent.Tell(new GameManagerNotifications.GameEnded(GetBaseDetails()));
+        Context.Parent.Tell(new GameManagerNotifications.GameUpdated(GetBaseDetails()));
+
     }
 
-    private void SetupRequest(GameMessages.SetupGameRequest message)
+    private void InitNewGame()
     {
-        if (_owner == null)
-        {
-            throw new InvalidGameStateException("Owner is null");
-        }
-
-        if (message.Player.Id != _owner.Id)
-        {
-            _hubWriterActor.Tell(new HubWriterMessages.WriteClientObject(message.Player, "Error",
-                "Only the game creator can setup game properties"));
-            return;
-        }
-
-        _gridSize = message.GridSize;
-
-        BroadCastVisible();
-    }
-
-    private void StartGameRequest(GameMessages.StartGameRequest message)
-    {
-        _cells = new Dictionary<int, NumberCell>();
+        _score = 0;
+        _cells = [];
 
         (Point2D p1, int val1) = _tilePlacer.PlaceTile(_cells, _gridSize);
         var cell1 = new NumberCell(GetNextId(_cells), val1, p1, true, false);
@@ -111,10 +90,7 @@ public class GameActor : ReceiveActor
         var cell2 = new NumberCell(GetNextId(_cells), val2, p2, true, false);
         _cells[cell2.Id] = cell2;
 
-        _score = 0;
-
-        SetGameStatus(GameStatus.Running);
-        BroadCastVisible();
+        _gameStatus = GameStatus.Running;
     }
 
     private void CreateGame(GameManagerMessages.CreateGameSpecificRequest message)
@@ -124,14 +100,16 @@ public class GameActor : ReceiveActor
             ? _gameId
             : message.GameId;
 
-        Context.Parent.Tell(new GameManagerNotifications.GameCreated(GetBaseDetails()));
+        InitNewGame();
+
+        Context.Sender.Tell(new GameManagerNotifications.GameCreated(GetBaseDetails()));
 
         _hubWriterActor.Tell(new HubWriterMessages.WriteClientObject(
             _owner,
             "SetPlayerGame",
             GetPublicVisibleData()));
 
-        StartGameRequest(new GameMessages.StartGameRequest(_owner));
+        BroadCastVisible();
     }
 
     private void MoveRequest(GameMessages.MoveRequest message)
@@ -194,35 +172,10 @@ public class GameActor : ReceiveActor
 
         if (IsGameOver(_cells, _gridSize))
         {
-            SetGameStatus(GameStatus.Complete);
+            _gameStatus = GameStatus.Complete;
         }
 
         BroadCastVisible();
-    }
-
-    private void SetGameStatus(GameStatus status)
-    {
-        _gameStatus = status;
-
-        Context.Parent.Tell(new GameManagerNotifications.GameUpdated(GetBaseDetails()));
-    }
-
-
-    private static bool CompareCell(Dictionary<int, NumberCell> grid, Point2D testPoint, NumberCell cell)
-    {
-        var testCellPoint = cell.Point.Add(testPoint);
-
-        var testCell = GridExtensions.GetByPos(testCellPoint, grid);
-
-        if (testCell != null)
-        {
-            if (testCell.Value == cell.Value && !testCell.Destroy)
-            {
-                return true;
-            }
-        }
-
-        return false;
     }
 
     private static bool IsGameOver(Dictionary<int, NumberCell> grid, int gridSize)
@@ -387,9 +340,7 @@ public class GameActor : ReceiveActor
         bool hasChanged = false;
         int scoreIncrement = 0;
 
-        var cell = GridExtensions.GetById(cellId, grid);
-
-        if (cell == null) throw new InvalidGameStateException($"Failed to find cell {cellId}");
+        var cell = GridExtensions.GetById(cellId, grid) ?? throw new InvalidGameStateException($"Failed to find cell {cellId}");
 
         while (true)
         {

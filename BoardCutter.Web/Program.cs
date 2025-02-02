@@ -19,9 +19,7 @@ builder.CreateUmbracoBuilder()
 
 builder.Services.AddSingleton<IPlayerService, MemoryPlayerService>();
 
-builder.Services.AddAkka("MyActorSystem", configurationBuilder =>
-{
-    configurationBuilder
+builder.Services.AddAkka("MyActorSystem", configurationBuilder => configurationBuilder
         .WithActors((system, registry, resolver) =>
         {
             var twenty48HubWriter =
@@ -32,13 +30,15 @@ builder.Services.AddAkka("MyActorSystem", configurationBuilder =>
                             resolver.GetService<IPlayerService>())),
                     "2048HubWriter");
 
+
             var gameActors = new Dictionary<string, Props>
             {
                 {
                     "2048",
-                    Props.Create(() =>  new BoardCutter.Games.Twenty48.GameActor(twenty48HubWriter, new RandomTilePlacer()))
+                    Props.Create(() =>  new GameActor(twenty48HubWriter, new RandomTilePlacer()))
                 }
             };
+
 
             var gameManagerActor =
                 system.ActorOf(
@@ -47,9 +47,10 @@ builder.Services.AddAkka("MyActorSystem", configurationBuilder =>
 
                     "GameManagerActor");
 
+
+
             registry.Register<GameManager>(gameManagerActor);
-        });
-});
+        }));
 
 
 WebApplication app = builder.Build();
