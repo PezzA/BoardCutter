@@ -27,6 +27,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CICD", "CICD", "{40C3F999-3
 		.github\workflows\staging.yml = .github\workflows\staging.yml
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BoardCutter.Games.CantStop", "BoardCutter.Games.CantStop\BoardCutter.Games.CantStop.csproj", "{9AA10A1E-57CF-4198-A43C-BC23186C9B45}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BoardCutter.Games.CantStop.Tests", "BoardCutter.Games.CantStop.Tests\BoardCutter.Games.CantStop.Tests.csproj", "{048E4D41-E16B-42EC-867D-2371F92C1CB7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -57,6 +61,14 @@ Global
 		{CAE021DE-796B-475A-ADF4-288B3322112A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CAE021DE-796B-475A-ADF4-288B3322112A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CAE021DE-796B-475A-ADF4-288B3322112A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9AA10A1E-57CF-4198-A43C-BC23186C9B45}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9AA10A1E-57CF-4198-A43C-BC23186C9B45}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9AA10A1E-57CF-4198-A43C-BC23186C9B45}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9AA10A1E-57CF-4198-A43C-BC23186C9B45}.Release|Any CPU.Build.0 = Release|Any CPU
+		{048E4D41-E16B-42EC-867D-2371F92C1CB7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{048E4D41-E16B-42EC-867D-2371F92C1CB7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{048E4D41-E16B-42EC-867D-2371F92C1CB7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{048E4D41-E16B-42EC-867D-2371F92C1CB7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -22,8 +22,8 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\BoardCutter.Core.Tests\BoardCutter.Core.Tests.csproj" />
-      <ProjectReference Include="..\BoardCutter.Games.Twenty48\BoardCutter.Games.Twenty48.csproj" />
+        <ProjectReference Include="..\BoardCutter.Core.Tests\BoardCutter.Core.Tests.csproj" />
+        <ProjectReference Include="..\BoardCutter.Games.Twenty48\BoardCutter.Games.Twenty48.csproj" />
     </ItemGroup>
 
 </Project>
