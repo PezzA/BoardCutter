@@ -12,7 +12,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\BoardCutter.ApiService\BoardCutter.ApiService.csproj" />
     <ProjectReference Include="..\BoardCutter.ServiceDefaults\BoardCutter.ServiceDefaults.csproj" />
   </ItemGroup>
 

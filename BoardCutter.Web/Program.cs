@@ -1,6 +1,6 @@
 using Auth0.AspNetCore.Authentication;
 
-using BoardCutter.ApiService.Hubs;
+using BoardCutter.Web.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
