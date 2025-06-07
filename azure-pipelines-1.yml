@@ -17,7 +17,7 @@ steps:
 - script: dotnet publish --configuration Release --output $(Build.ArtifactStagingDirectory)
   displayName: 'Publish Project'
 
-  - task: ArchiveFiles@2
+- task: ArchiveFiles@2
   inputs:
     rootFolderOrFile: '$(Build.ArtifactStagingDirectory)'
     includeRootFolder: false
