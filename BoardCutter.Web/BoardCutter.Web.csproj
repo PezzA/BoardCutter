@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>aspnet-BoardCutter.Web-addd19f1-9802-4987-aad9-ebbf39386441</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Auth0.AspNetCore.Authentication" Version="1.4.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\BoardCutter.ApiService\BoardCutter.ApiService.csproj" />
+    <ProjectReference Include="..\BoardCutter.ServiceDefaults\BoardCutter.ServiceDefaults.csproj" />
+  </ItemGroup>
+
+</Project>
