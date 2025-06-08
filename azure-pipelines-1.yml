@@ -15,7 +15,7 @@ steps:
     installationPath: $(Agent.ToolsDirectory)/dotnet
 
 - script: npm install && npm run release
-  workingDirectory: Boardcutter.Web/ClientApp
+  workingDirectory: BoardCutter.Web/ClientApp
   displayName: 'Build Client App'  
 
 - script: dotnet publish --configuration Release --output $(Build.ArtifactStagingDirectory)
