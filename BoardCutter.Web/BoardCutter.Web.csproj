@@ -17,4 +17,8 @@
     <ProjectReference Include="..\BoardCutter.ServiceDefaults\BoardCutter.ServiceDefaults.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <_ContentIncludedByDefault Remove="Areas\Identity\Pages\_ViewStart.cshtml" />
+  </ItemGroup>
+
 </Project>

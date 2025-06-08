@@ -7,7 +7,6 @@ using BoardCutter.Core.Actors;
 using BoardCutter.Core.Actors.HubWriter;
 using BoardCutter.Core.Players;
 using BoardCutter.Games.Twenty48;
-using BoardCutter.Web.Hubs;
 
 using Microsoft.AspNetCore.SignalR;
 
@@ -76,7 +75,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapHealthChecks("/health");
-app.MapHub<ChatHub>("/chat");
+app.MapHub<Twenty48Hub>("/twenty48hub");
 app.MapStaticAssets();
 app.MapControllers();
 app.MapRazorPages()
