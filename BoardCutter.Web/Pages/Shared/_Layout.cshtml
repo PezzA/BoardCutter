@@ -13,7 +13,7 @@
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container">
-                <a class="navbar-brand" asp-area="" asp-page="/Index">BoardCutter.Web</a>
+                <a href="/">BoardCutter</a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -21,16 +21,13 @@
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-page="/Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-page="/Privacy">Privacy</a>
+                            <a class="nav-link text-dark" href="/Privacy">Privacy</a>
                         </li>
                     </ul>
                     <ul class="nav navbar-nav navbar-right">
                         @if (User.Identity is { IsAuthenticated: true })
                         {
-                            <li>Hello <a href="profile">@User.Identity.Name</a>!</li>
+                            <li>Hello <a href="/claims">@User.Identity.Name</a>!</li>
                             <li><a href="/logout">Logout</a></li>
                         }
                         else
