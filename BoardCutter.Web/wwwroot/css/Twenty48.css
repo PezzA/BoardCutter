@@ -63,7 +63,7 @@
 }
 
 
-/* Small */
+/* Extra Small */
 @container gameArea (width < 576px) {
     .gamearea {
         border: 1pt solid red;
@@ -72,13 +72,13 @@
     }
 
     #gameBoard {
-        width: 500px;
-        height: 500px;
+        width: 370px;
+        height: 370px;
     }
 
     .cell {
-        width: 116px;
-        height: 116px;
+        width: 85px;
+        height: 85px;
         border-radius: 10px;
         font-size: 24pt;
     }
@@ -92,38 +92,19 @@
     }
 
     #gameBoard {
-        width: 690px;
-        height: 690px;
+        width: 670px;
+        height: 670px;
     }
 
     .cell {
-        width: 158px;
-        height: 158px;
+        width: 150px;
+        height: 150px;
         border-radius: 10px;
         font-size: 30pt;
     }
 }
 
 
-/* Large */
-@container gameArea (width >= 768px) {
-    .gamearea {
-        width: 900px;
-        height: 900px;
-    }
-
-    #gameBoard {
-        width: 900px;
-        height: 900px;
-    }
-
-    .cell {
-        width: 205px;
-        height: 205px;
-        border-radius: 10px;
-        font-size: 42pt;
-    }
-}
 
 
 @keyframes slidein {
@@ -150,7 +131,6 @@
     position: absolute;
     transition-duration: 0.10s;
     animation-duration: 0.15s;
-    animation-name: slidein;
     animation-fill-mode: forwards;
     display: flex;
     justify-content: center;

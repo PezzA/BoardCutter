@@ -7,7 +7,7 @@
   "scripts": {
     "build": "webpack --mode=development --watch",
     "release": "webpack --mode=production",
-    "publish": "npm run release && dotnet publish -c Release"
+    "publish": "npm run release"
   },
   "keywords": [],
   "author": "",

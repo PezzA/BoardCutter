@@ -227,43 +227,22 @@ export class Twenty48 {
 
     resize(this: Twenty48, forceDraw: boolean = false): void {
         var bounds = this.windowElements.gameContainer.getBoundingClientRect();
-        var sizeChanged = false;
         const width = bounds.width;
 
-        if (width < 517 && this._prevSize !== 'S') {
+        const cmpCellWidth = this._cellWidth
+        
+        if (width < 576) {
             this.logger.logDebug('Setting Small');
-            this._cellWidth = 116;
-            this._cellMargin = 7;
-            sizeChanged = true;
-            this._prevSize = 'S';
-        } else if (this.withinOne(width, 696) && this._prevSize !== 'M') {
-            this.logger.logDebug('Setting Medium');
-            this._cellWidth = 158;
-            this._cellMargin = 11;
-            sizeChanged = true;
-            this._prevSize = 'M';
-        } else if (this.withinOne(width, 936) && this._prevSize !== 'L') {
-            this.logger.logDebug('Setting Large');
-            this._cellWidth = 205;
-            this._cellMargin = 15;
-            sizeChanged = true;
-            this._prevSize = 'L';
+            this._cellWidth = 85;
+            this._cellMargin = 6;
         } else {
-            if (forceDraw) {
-                this.logger.logWarn('Did Nothing!' + width);
-            }
-        }
-
-        this.windowElements.layoutData.textContent = `Width: ${width}, Cell Width: ${this._cellWidth}, Margin: ${this._cellMargin}, PrevSize ${this._prevSize}`;
-
-        if (sizeChanged || forceDraw) {
-
-            if (forceDraw) {
-                this.logger.logDebug("Force Redrawing")
-            } else {
-                this.logger.logDebug("Redrawing")
-            }
-
+            this.logger.logDebug('Setting Medium');
+            this._cellWidth = 150;
+            this._cellMargin = 13;
+        } 
+        
+        if(cmpCellWidth != this._cellWidth)
+        {
             this.windowElements.gameBoard.innerHTML = '';
 
             for (let x = 0; x < 4; x++) {
@@ -273,6 +252,7 @@ export class Twenty48 {
             }
             this.drawCells();
         }
+      
     }
 
     getDirectionFromKey(key: string): number {
