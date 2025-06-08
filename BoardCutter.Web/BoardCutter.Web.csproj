@@ -12,6 +12,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\BoardCutter.Core\BoardCutter.Core.csproj" />
+    <ProjectReference Include="..\BoardCutter.Games.Twenty48\BoardCutter.Games.Twenty48.csproj" />
     <ProjectReference Include="..\BoardCutter.ServiceDefaults\BoardCutter.ServiceDefaults.csproj" />
   </ItemGroup>
 

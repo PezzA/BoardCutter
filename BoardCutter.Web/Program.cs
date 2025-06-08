@@ -1,6 +1,15 @@
+using Akka.Actor;
+using Akka.Hosting;
+
 using Auth0.AspNetCore.Authentication;
 
+using BoardCutter.Core.Actors;
+using BoardCutter.Core.Actors.HubWriter;
+using BoardCutter.Core.Players;
+using BoardCutter.Games.Twenty48;
 using BoardCutter.Web.Hubs;
+
+using Microsoft.AspNetCore.SignalR;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +25,37 @@ builder.Services.AddAuth0WebAppAuthentication(options =>
     options.Domain = builder.Configuration["Auth0:Domain"];
     options.ClientId = builder.Configuration["Auth0:ClientId"];
 });
+
+builder.Services.AddSingleton<IPlayerService, MemoryPlayerService>();
+
+builder.Services.AddAkka("MyActorSystem", configurationBuilder => configurationBuilder
+    .WithActors((system, registry, resolver) =>
+    {
+        var twenty48HubWriter =
+            system.ActorOf(
+                Props.Create(() =>
+                    new HubClientWriter<Twenty48Hub>(
+                        resolver.GetService<IHubContext<Twenty48Hub>>(),
+                        resolver.GetService<IPlayerService>())),
+                "2048HubWriter");
+        
+        var gameActors = new Dictionary<string, Props>
+        {
+            {
+                "2048",
+                Props.Create(() =>  new GameActor(twenty48HubWriter, new RandomTilePlacer()))
+            }
+        };
+        
+        var gameManagerActor =
+            system.ActorOf(
+                Props.Create(
+                    () => new GameManager(gameActors)),
+                "GameManagerActor");
+        
+        registry.Register<GameManager>(gameManagerActor);
+    }));
+
 
 builder.Services.AddRazorPages();
 
