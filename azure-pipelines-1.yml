@@ -18,7 +18,7 @@ steps:
   displayName: 'Publish Project'
 
 - script: npm install && npm run release
-  workingDirectory: BoardCutter.Web/ClientApp
+  workingDirectory: $(Build.ArtifactStagingDirectory)/ClientApp
   displayName: 'Build Client App'  
 
 - task: ArchiveFiles@2
