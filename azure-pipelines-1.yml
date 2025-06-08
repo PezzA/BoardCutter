@@ -17,6 +17,10 @@ steps:
 - script: dotnet publish --configuration Release --output $(Build.ArtifactStagingDirectory)
   displayName: 'Publish Project'
 
+- script: npm install && npm run release
+  workingDirectory: BoardCutter.Web/ClientApp
+  displayName: 'Build Client App'  
+
 - task: ArchiveFiles@2
   inputs:
     rootFolderOrFile: '$(Build.ArtifactStagingDirectory)'
