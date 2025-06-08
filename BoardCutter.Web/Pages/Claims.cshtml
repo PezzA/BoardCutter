@@ -1,4 +1,6 @@
 ﻿@page
+@using BoardCutter.Web.Services
+@model ClaimsModel
 <div class="row">
     <div class="col-md-12">
 
@@ -24,6 +26,10 @@
                     <td>@claim.Value</td>
                 </tr>
             }
+            <tr>
+                <td>UserId</td>
+                <td>@UserExtensions.GetUserId(User.Claims)</td>
+            </tr>
             </tbody>
         </table>
     </div>

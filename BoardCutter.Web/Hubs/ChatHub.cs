@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using BoardCutter.Web.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 
 namespace BoardCutter.Web.Hubs;
@@ -7,7 +8,10 @@ namespace BoardCutter.Web.Hubs;
 public class ChatHub : Hub
 {
     public async Task SendMessage(string message)
-    {   
-        await Clients.All.SendAsync("ReceiveMessage", Context.User?.Identity?.Name, message);
+    {
+        if (Context.User?.Claims != null)
+        {
+            await Clients.All.SendAsync("ReceiveMessage", UserExtensions.GetUserId(Context.User.Claims), message);
+        }
     }
 }
