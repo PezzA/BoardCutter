@@ -25,13 +25,8 @@ steps:
     archiveFile: '$(Build.ArtifactStagingDirectory)/app.zip'
     replaceExistingArchive: true
 
-- task: PublishBuildArtifacts@1
-  inputs:
-    PathtoPublish: '$(Build.ArtifactStagingDirectory)/app.zip'
-    ArtifactName: 'drop'
-
 - task: AzureWebApp@1
   inputs:
     azureSubscription: 'BoardCutterDev'
     appName: 'BoardCutterDev'
-    package: '$(Build.ArtifactStagingDirectory)/drop/app.zip'
+    package: '$(Build.ArtifactStagingDirectory)/app.zip'
