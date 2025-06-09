@@ -96,6 +96,7 @@ export class Twenty48 {
         }
 
         this._touchStartHandler = function (evt: TouchEvent) {
+            evt.preventDefault();
             const firstTouch = evt.touches[0];
             classClosure._xDown = firstTouch.clientX;
             classClosure._yDown = firstTouch.clientY;
