@@ -18,10 +18,11 @@ export class Twenty48 {
 
     private _cellWidth = 0;
     private _cellMargin = 0;
-    private _prevSize: string = '';
     private _modCells: any = [];
     private _keydownHandler: any;
-    private _resizeHanlder: any;
+    private _resizeHandler: any;
+    private _touchStartHandler: any;
+    private _touchEndHandler: any;
 
     private addEventListeners(this: Twenty48): void {
         this.removeEventListeners();
@@ -30,8 +31,9 @@ export class Twenty48 {
 
         this._keydownHandler = function (this: Window, e: KeyboardEvent) {
             if (e.repeat) return;
-
-            if (e.key === "ArrowUp" || e.key === "ArrowDown" || e.key === "ArrowLeft" || e.key === "ArrowRight") {
+            
+            if (e.key === "ArrowUp" || e.key === "ArrowDown" || e.key === "ArrowLeft" || e.key === "ArrowRight" ||
+                e.key === "w" || e.key === "a" || e.key === "s" || e.key === "d") {
                 e.preventDefault();
 
                 var decodedKey = classClosure.getDirectionFromKey(e.key);
@@ -45,25 +47,76 @@ export class Twenty48 {
                             console.log("Could not invoke method [Move] on signalR connection." + err.toString());
                         });
 
-                    classClosure.logger.logDebug("Procssing Move: " + decodedKey);
+                    classClosure.logger.logDebug("Processing Move: " + decodedKey);
                 }
             }
         }
+        
+        this._touchEndHandler = function (evt: TouchEvent) {
+            evt.preventDefault();
+            
+            if (!classClosure._xDown || !classClosure._yDown) {
+                return;
+            }
+            
+            var xUp = evt.changedTouches[0].clientX;
+            var yUp = evt.changedTouches[0].clientY;
 
-        this._resizeHanlder = function () {
+            var xDiff = classClosure._xDown - xUp;
+            var yDiff = classClosure._yDown - yUp;
+
+            let dir = -1;
+
+            if (Math.abs(xDiff) > Math.abs(yDiff)) {
+                if (xDiff > 0) {
+                    dir = 2;
+                } else {
+                    dir = 3;
+                }
+            } else {
+                if (yDiff > 0) {
+                    dir = 0;
+                } else {
+                    dir = 1;
+                }
+            }
+            
+            if (dir !== -1) {
+                classClosure.connection
+                    .invoke("Move", classClosure.gameId, dir)
+                    .catch(function (this: Twenty48, err: Error) {
+                        this.logger.logError("Could not invoke method [Move] on signalR connection." + err.toString());
+                    });
+
+                classClosure.logger.logDebug("Processing Move: " + dir);
+            }
+
+            classClosure._xDown = null;
+            classClosure._yDown = null;
+        }
+
+        this._touchStartHandler = function (evt: TouchEvent) {
+            const firstTouch = evt.touches[0];
+            classClosure._xDown = firstTouch.clientX;
+            classClosure._yDown = firstTouch.clientY;
+        }
+        
+        this._resizeHandler = function () {
             classClosure.resize();
         }
 
         // https://stackoverflow.com/questions/2264072/detect-a-finger-swipe-through-javascript-on-the-iphone-and-android
-        //this.windowElements.gameBoard.addEventListener('touchstart', this.handleTouchStart);
-        //this.windowElements.gameBoard.addEventListener('touchend', this.handleTouchEnd);
+        this.windowElements.gameBoard.addEventListener('touchstart', this._touchStartHandler);
+        this.windowElements.gameBoard.addEventListener('touchend', this._touchEndHandler);
         window.addEventListener("keydown", this._keydownHandler);
-        window.addEventListener("resize", this._resizeHanlder);
+        window.addEventListener("resize", this._resizeHandler);
     }
 
     private removeEventListeners(this: Twenty48): void {
-        window.removeEventListener("resize", this._resizeHanlder);
+        window.removeEventListener("resize", this._resizeHandler);
         window.removeEventListener("keydown", this._keydownHandler);
+        this.windowElements.gameBoard.removeEventListener('touchstart', this._touchStartHandler);
+        this.windowElements.gameBoard.removeEventListener('touchend', this._touchEndHandler);
     }
 
     constructor(elements: WindowElements, readyHandler: () => void, toastHandler: (message: string) => void) {
@@ -101,7 +154,6 @@ export class Twenty48 {
             .catch(function (err: Error) {
                 that.logger.logError(`Could not invoke StartNew on signalR Connection. Error : ${err.message}`);
             });
-
     }
 
     connect(this: Twenty48, gameId: string): void {
@@ -165,10 +217,8 @@ export class Twenty48 {
 
             if (data.Status === 3) {
                 that.logger.logDebug('End of Game');
-                //               this.windowElements.gameBoard.removeEventListener('touchstart', this.handleTouchStart);
-                //              this.windowElements.gameBoard.removeEventListener('touchend', this.handleTouchEnd);
-                //                this.windowElements.gameBoard.style.opacity = "0.3";
-                //                window.removeEventListener("keydown", this.handleKeyDown);
+                   
+                    that.windowElements.gameBoard.style.opacity = "0.3";
                 that.removeEventListeners();
                 that.windowElements.gameOver.style.opacity = "1";
             }
@@ -196,7 +246,6 @@ export class Twenty48 {
     }
 
     addCell(this: Twenty48, id: number, value: number, x: number, y: number) {
-
         const node = document.createElement("div");
 
         node.id = this.getCellId(id.toString());
@@ -252,53 +301,30 @@ export class Twenty48 {
             }
             this.drawCells();
         }
-      
     }
 
     getDirectionFromKey(key: string): number {
         switch (key) {
             case "ArrowUp":
+            case "w":    
                 return 0;
             case "ArrowDown":
+            case "s":
                 return 1;
             case "ArrowLeft":
+            case "a":                
                 return 2;
             case "ArrowRight":
+            case "d":
                 return 3;
             default:
                 return -1;
         }
     }
-
-    handleKeyDown(this: Twenty48, e: KeyboardEvent) {
-        if (e.repeat) return;
-
-        if (e.key === "ArrowUp" || e.key === "ArrowDown" || e.key === "ArrowLeft" || e.key === "ArrowRight") {
-            e.preventDefault();
-
-            var decodedKey = this.getDirectionFromKey(e.key);
-
-            this.logger.logUp("Move: " + "[GameId:" + this.gameId + "]" + " [Direction:" + decodedKey + "]");
-
-            if (decodedKey !== -1) {
-                this.connection
-                    .invoke("Move", this.gameId, decodedKey)
-                    .catch(function (this: Twenty48, err: Error) {
-                        this.logger.logError("Could not invoke method [Move] on signalR connection." + err.toString());
-                    });
-
-                this.logger.logDebug("Procssing Move: " + decodedKey);
-            }
-        }
-    }
-
+    
     initGrid(this: Twenty48) {
-        this.logger.logDebug('Initalising Game');
+        this.logger.logDebug('Initialising Game');
         this.addEventListeners();
-
-        // https://stackoverflow.com/questions/2264072/detect-a-finger-swipe-through-javascript-on-the-iphone-and-android
-        //this.windowElements.gameBoard.addEventListener('touchstart', this.handleTouchStart);
-        //this.windowElements.gameBoard.addEventListener('touchend', this.handleTouchEnd);
 
         this.resize(true);
     };
@@ -313,60 +339,7 @@ export class Twenty48 {
         this.drawCells();
     }
 
-    handleTouchStart(evt: TouchEvent): void {
-        console.log(evt);
-        evt.preventDefault();
-        const firstTouch = evt.touches[0];
-        this._xDown = firstTouch.clientX;
-        this._yDown = firstTouch.clientY;
-    };
-
-    handleTouchEnd(this: Twenty48, evt: TouchEvent) {
-        console.log(evt);
-        evt.preventDefault();
-        if (!this._xDown || !this._yDown) {
-            return;
-        }
-
-        var xUp = evt.changedTouches[0].clientX;
-        var yUp = evt.changedTouches[0].clientY;
-
-        var xDiff = this._xDown - xUp;
-        var yDiff = this._yDown - yUp;
-
-        let dir = -1;
-
-        if (Math.abs(xDiff) > Math.abs(yDiff)) {
-            if (xDiff > 0) {
-                dir = 2;
-            } else {
-                dir = 3;
-            }
-        } else {
-            if (yDiff > 0) {
-                dir = 0;
-            } else {
-                dir = 1;
-            }
-        }
-
-        if (dir !== -1) {
-            this.connection
-                .invoke("Move", this.gameId, dir)
-                .catch(function (this: Twenty48, err: Error) {
-                    this.logger.logError("Could not invoke method [Move] on signalR connection." + err.toString());
-                });
-
-            this.logger.logDebug("Procssing Move: " + dir);
-        }
-
-        this._xDown = null;
-        this._yDown = null;
-    };
-
     drawCells(this: Twenty48) {
-
-
         if (!this._modCells) {
             this.logger.logWarn("drawCells: No cells to draw");
             return;
