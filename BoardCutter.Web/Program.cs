@@ -23,6 +23,7 @@ builder.Services.AddAuth0WebAppAuthentication(options =>
 {
     options.Domain = builder.Configuration["Auth0:Domain"];
     options.ClientId = builder.Configuration["Auth0:ClientId"];
+    
 });
 
 builder.Services.AddSingleton<IPlayerService, MemoryPlayerService>();
@@ -56,7 +57,33 @@ builder.Services.AddAkka("MyActorSystem", configurationBuilder => configurationB
     }));
 
 
+// Add CORS policy to allow localhost:5174 and share cookies
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("Localhost5173Policy", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173")
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+    });
+});
+
 builder.Services.AddRazorPages();
+
+builder.Services.Configure<CookiePolicyOptions>(options =>
+{
+    options.MinimumSameSitePolicy = SameSiteMode.Lax;
+    options.HttpOnly = Microsoft.AspNetCore.CookiePolicy.HttpOnlyPolicy.Always;
+    options.Secure = CookieSecurePolicy.None; // Do not set Secure on cookies
+});
+
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.Cookie.Domain = "localhost";
+    options.Cookie.SameSite = SameSiteMode.Lax;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.None; // Do not set Secure on cookies
+});
 
 var app = builder.Build();
 
@@ -68,7 +95,10 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-app.UseHttpsRedirection();
+// app.UseHttpsRedirection();
+
+// Use CORS policy before routing
+app.UseCors("Localhost5173Policy");
 
 app.UseRouting();
 app.UseAuthentication();

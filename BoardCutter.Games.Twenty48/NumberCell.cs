@@ -2,5 +2,5 @@
 
 namespace BoardCutter.Games.Twenty48
 {
-    public record NumberCell(int Id, int Value, Point2D Point, bool New, bool Destroy);
+    public record NumberCell(int Id, int Value, Point2D Point, bool New, bool Destroy, bool Merged);
 }

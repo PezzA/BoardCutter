@@ -4,12 +4,14 @@ using Akka.Hosting;
 using BoardCutter.Core.Actors;
 using BoardCutter.Core.Players;
 
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 
 namespace BoardCutter.Games.Twenty48
 {
     public record GetBasicDetailsResult(bool Success, Player Player, IActorRef? GameActor);
 
+    [Authorize]
     public class Twenty48Hub(IRequiredActor<GameManager> gameManagerActor, IPlayerService playerService) : Hub
     {
         private readonly IActorRef _gameManagerActor = gameManagerActor.ActorRef;

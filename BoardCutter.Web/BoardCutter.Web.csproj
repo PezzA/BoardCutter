@@ -19,6 +19,11 @@
 
   <ItemGroup>
     <_ContentIncludedByDefault Remove="Areas\Identity\Pages\_ViewStart.cshtml" />
+    <_ContentIncludedByDefault Remove="boardcutter-client\package-lock.json" />
+    <_ContentIncludedByDefault Remove="boardcutter-client\package.json" />
+    <_ContentIncludedByDefault Remove="boardcutter-client\tsconfig.app.json" />
+    <_ContentIncludedByDefault Remove="boardcutter-client\tsconfig.json" />
+    <_ContentIncludedByDefault Remove="boardcutter-client\tsconfig.node.json" />
   </ItemGroup>
 
 </Project>

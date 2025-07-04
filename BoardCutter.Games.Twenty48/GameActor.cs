@@ -62,11 +62,11 @@ public class GameActor : ReceiveActor
         _cells = [];
 
         (Point2D p1, int val1) = _tilePlacer.PlaceTile(_cells, _gridSize);
-        var cell1 = new NumberCell(GetNextId(_cells), val1, p1, true, false);
+        var cell1 = new NumberCell(GetNextId(_cells), val1, p1, true, false, false);
         _cells[cell1.Id] = cell1;
 
         (Point2D p2, int val2) = _tilePlacer.PlaceTile(_cells, _gridSize);
-        var cell2 = new NumberCell(GetNextId(_cells), val2, p2, true, false);
+        var cell2 = new NumberCell(GetNextId(_cells), val2, p2, true, false, false);
         _cells[cell2.Id] = cell2;
 
         _gameStatus = GameStatus.Running;
@@ -146,7 +146,7 @@ public class GameActor : ReceiveActor
         {
             (Point2D point, int val1) = _tilePlacer.PlaceTile(_cells, _gridSize);
             var nextId = GetNextId(_cells);
-            _cells[nextId] = new NumberCell(nextId, val1, point, true, false);
+            _cells[nextId] = new NumberCell(nextId, val1, point, true, false, false);
         }
 
         if (IsGameOver(_cells, _gridSize))
@@ -346,7 +346,7 @@ public class GameActor : ReceiveActor
 
                 int nextId = GetNextId(grid);
 
-                grid[nextId] = new NumberCell(nextId, targetCell.Value * 2, testCell.Point, true, false);
+                grid[nextId] = new NumberCell(nextId, targetCell.Value * 2, testCell.Point, true, false, true);
                 return (true, targetCell.Value * 2);
             }
 
