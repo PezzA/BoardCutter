@@ -7,6 +7,8 @@ using BoardCutter.Core.Actors;
 using BoardCutter.Core.Actors.HubWriter;
 using BoardCutter.Core.Players;
 using BoardCutter.Games.Twenty48;
+using BoardCutter.Web.Extensions;
+using BoardCutter.Web.Middleware;
 
 using Microsoft.AspNetCore.SignalR;
 
@@ -24,6 +26,18 @@ builder.Services.AddAuth0WebAppAuthentication(options =>
     options.Domain = builder.Configuration["Auth0:Domain"];
     options.ClientId = builder.Configuration["Auth0:ClientId"];
     
+});
+
+// Add BoardCutter cookie-based authentication for anonymous users
+builder.Services.AddBoardCutterAuthentication();
+
+// Configure authorization policies to support multiple authentication schemes
+builder.Services.AddAuthorization(options =>
+{
+    options.DefaultPolicy = new Microsoft.AspNetCore.Authorization.AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .AddAuthenticationSchemes("Auth0", "BoardCutter")
+        .Build();
 });
 
 builder.Services.AddSingleton<IPlayerService, MemoryPlayerService>();
@@ -99,6 +113,9 @@ if (!app.Environment.IsDevelopment())
 
 // Use CORS policy before routing
 app.UseCors("Localhost5173Policy");
+
+// Add BoardCutter cookie middleware
+app.UseMiddleware<BoardCutterCookieMiddleware>();
 
 app.UseRouting();
 app.UseAuthentication();
