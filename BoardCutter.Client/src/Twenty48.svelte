@@ -1,4 +1,4 @@
-<script lang="ts">
+﻿<script lang="ts">
     import {onMount} from 'svelte';
     import * as signalR from '@microsoft/signalr';
     // @ts-ignore - Svelte component import
@@ -14,7 +14,7 @@
     let gameId: string = '';
 
     let loggerPanelRef: any = null;
-
+  
     function pushLog(text: string, cssClass: string) {
         if (loggerPanelRef && loggerPanelRef.addMessage) {
             loggerPanelRef.addMessage({text, cssClass});

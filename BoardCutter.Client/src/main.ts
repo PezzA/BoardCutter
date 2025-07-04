@@ -1,7 +1,7 @@
 import { mount } from 'svelte'
-import App from './App.svelte'
+import Twenty48 from './Twenty48.svelte'
 
-const app = mount(App, {
+const app = mount(Twenty48, {
   target: document.getElementById('app')!,
 })
 
