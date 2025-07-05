@@ -1,0 +1,157 @@
+﻿using System.Net;
+
+namespace BoardCutter.Web.Middleware
+{
+    public class SvelteDevProxyMiddleware
+    {
+        private readonly RequestDelegate _next;
+        private readonly string _svelteDevServerUrl;
+        private readonly HttpClient _httpClient;
+
+        public SvelteDevProxyMiddleware(RequestDelegate next, string svelteDevServerUrl = "http://localhost:5173")
+        {
+            _next = next;
+            _svelteDevServerUrl = svelteDevServerUrl;
+            _httpClient = new HttpClient();
+        }
+
+        public async Task InvokeAsync(HttpContext context)
+        {
+            // Only proxy in development and for non-API routes
+            if (ShouldProxy(context))
+            {
+                await ProxyToSvelteDevServer(context);
+                return;
+            }
+
+            await _next(context);
+        }
+
+        private bool ShouldProxy(HttpContext context)
+        {
+            var path = context.Request.Path.Value?.ToLower() ?? "";
+            
+            // Don't proxy Razor Page routes - let ASP.NET Core handle them
+            if (path == "/" || path == "" ||
+                path == "/claims" ||
+                path == "/error" ||
+                path == "/login" ||
+                path == "/logout" ||
+                path == "/privacy" ||
+                path == "/callback" ||
+                path == "/twenty48")
+            {
+                return false;
+            }
+            
+            // Don't proxy API routes, SignalR hubs, or static assets
+            if (path.StartsWith("/api") || 
+                path.StartsWith("/health") ||
+                path.StartsWith("/twenty48hub") ||
+                path.StartsWith("/gamelobbyhub") ||
+                path.StartsWith("/_framework") ||
+                path.StartsWith("/css") ||
+                path.StartsWith("/js") ||
+                path.StartsWith("/lib"))
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        private async Task ProxyToSvelteDevServer(HttpContext context)
+        {
+            try
+            {
+                var requestUri = $"{_svelteDevServerUrl}{context.Request.Path}{context.Request.QueryString}";
+                
+                using var requestMessage = new HttpRequestMessage(
+                    new HttpMethod(context.Request.Method), 
+                    requestUri);
+
+                // Copy headers (except Host)
+                foreach (var header in context.Request.Headers)
+                {
+                    if (!header.Key.Equals("Host", StringComparison.OrdinalIgnoreCase))
+                    {
+                        requestMessage.Headers.TryAddWithoutValidation(header.Key, header.Value.ToArray());
+                    }
+                }
+
+                // Copy body for POST/PUT requests
+                if (context.Request.ContentLength > 0)
+                {
+                    requestMessage.Content = new StreamContent(context.Request.Body);
+                    if (context.Request.ContentType != null)
+                    {
+                        requestMessage.Content.Headers.TryAddWithoutValidation("Content-Type", context.Request.ContentType);
+                    }
+                }
+
+                using var responseMessage = await _httpClient.SendAsync(requestMessage);
+                
+                // Copy response status
+                context.Response.StatusCode = (int)responseMessage.StatusCode;
+
+                // Copy response headers (excluding HTTP/1.1 specific headers that are invalid for HTTP/2 and HTTP/3)
+                foreach (var header in responseMessage.Headers)
+                {
+                    if (IsValidHeaderForHttpVersion(header.Key))
+                    {
+                        context.Response.Headers.TryAdd(header.Key, header.Value.ToArray());
+                    }
+                }
+
+                foreach (var header in responseMessage.Content.Headers)
+                {
+                    if (IsValidHeaderForHttpVersion(header.Key))
+                    {
+                        context.Response.Headers.TryAdd(header.Key, header.Value.ToArray());
+                    }
+                }
+
+                // Copy response body only if the status code allows it
+                // HTTP 304 (Not Modified) and some other status codes should not have a body
+                if (ShouldCopyResponseBody(responseMessage.StatusCode))
+                {
+                    await responseMessage.Content.CopyToAsync(context.Response.Body);
+                }
+            }
+            catch (HttpRequestException)
+            {
+                // If Svelte dev server is not running, fall back to serving static files
+                context.Response.StatusCode = 404;
+                await context.Response.WriteAsync("Svelte dev server not available. Please run 'npm run dev' in the BoardCutter.Client folder.");
+            }
+        }
+
+        private static bool ShouldCopyResponseBody(System.Net.HttpStatusCode statusCode)
+        {
+            // These status codes should not have a response body
+            return statusCode != System.Net.HttpStatusCode.NotModified && // 304
+                   statusCode != System.Net.HttpStatusCode.NoContent && // 204
+                   statusCode != System.Net.HttpStatusCode.ResetContent && // 205
+                   (int)statusCode != 100 && // Continue
+                   (int)statusCode != 101 && // Switching Protocols
+                   (int)statusCode != 102 && // Processing
+                   (int)statusCode != 103;   // Early Hints
+        }
+
+        private static bool IsValidHeaderForHttpVersion(string headerName)
+        {
+            // Filter out HTTP/1.1 specific headers that are invalid for HTTP/2 and HTTP/3
+            // Add any other headers that need to be filtered out based on your requirements
+            return !headerName.Equals("Connection", StringComparison.OrdinalIgnoreCase) &&
+                   !headerName.Equals("Transfer-Encoding", StringComparison.OrdinalIgnoreCase) &&
+                   !headerName.Equals("Keep-Alive", StringComparison.OrdinalIgnoreCase) &&
+                   !headerName.Equals("Upgrade", StringComparison.OrdinalIgnoreCase) &&
+                   !headerName.Equals("Proxy-Connection", StringComparison.OrdinalIgnoreCase);
+        }
+
+        public void Dispose()
+        {
+            _httpClient?.Dispose();
+        }
+    }
+}

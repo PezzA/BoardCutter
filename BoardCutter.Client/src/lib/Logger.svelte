@@ -65,10 +65,10 @@
         font-size: 0.675rem;
         font-family: monospace;
     }
-    .log-success { color: #4caf50; }
+    .log-success { color: #ffc720; }
     .log-error { color: #f44336; }
     .log-warn { color: #ffc720; background-color: #000000; }
     .log-debug { color: #2196f3; }
-    .log-up { color: #b2ff59; }
+    .log-up { color: orange; }
     .log-down { color: #ffb300; }
 </style>

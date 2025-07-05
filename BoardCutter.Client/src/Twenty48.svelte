@@ -24,7 +24,7 @@
     async function connectToSignalR(): Promise<void> {
 
         connection = new signalR.HubConnectionBuilder()
-            .withUrl('http://localhost:5152/twenty48hub', {
+            .withUrl('https://localhost:7147/twenty48hub', {
                 withCredentials: true
             })
             .withAutomaticReconnect()

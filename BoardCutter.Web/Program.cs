@@ -8,6 +8,7 @@ using BoardCutter.Core.Actors.HubWriter;
 using BoardCutter.Core.Players;
 using BoardCutter.Games.Twenty48;
 using BoardCutter.Web.Extensions;
+using BoardCutter.Web.Hubs;
 using BoardCutter.Web.Middleware;
 
 using Microsoft.AspNetCore.SignalR;
@@ -117,15 +118,42 @@ app.UseCors("Localhost5173Policy");
 // Add BoardCutter cookie middleware
 app.UseMiddleware<BoardCutterCookieMiddleware>();
 
+// Add Svelte dev proxy middleware in development
+if (app.Environment.IsDevelopment())
+{
+    app.UseMiddleware<SvelteDevProxyMiddleware>();
+}
+
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
+// Serve static files from the client dist folder (only if it exists)
+var clientDistPath = Path.Combine(app.Environment.ContentRootPath, "../BoardCutter.Client/dist");
+if (Directory.Exists(clientDistPath))
+{
+    app.UseStaticFiles(new StaticFileOptions
+    {
+        FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(clientDistPath),
+        RequestPath = ""
+    });
+}
+
 app.MapHealthChecks("/health");
 app.MapHub<Twenty48Hub>("/twenty48hub");
+app.MapHub<GameLobbyHub>("/gamelobbyhub");
 app.MapStaticAssets();
 app.MapControllers();
 app.MapRazorPages()
    .WithStaticAssets();
+
+// Fallback for client-side routing - serve index.html for any non-API routes (only if dist exists)
+if (Directory.Exists(clientDistPath))
+{
+    app.MapFallbackToFile("index.html", new StaticFileOptions
+    {
+        FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(clientDistPath)
+    });
+}
 
 app.Run();
