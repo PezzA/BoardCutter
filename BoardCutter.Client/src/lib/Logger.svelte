@@ -69,6 +69,6 @@
     .log-error { color: #f44336; }
     .log-warn { color: #ffc720; background-color: #000000; }
     .log-debug { color: #2196f3; }
-    .log-up { color: orange; }
+    .log-up { color: greenyellow; }
     .log-down { color: #ffb300; }
 </style>

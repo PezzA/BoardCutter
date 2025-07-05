@@ -1,94 +1,23 @@
 ﻿@page
-<link href="/css/Twenty48.css" rel="stylesheet">
-<div class="text-center">
-    <h1 class="display-4">2048</h1>
-</div>
-<div id="newGame" hidden="hidden">
-  Welcome to 2048!
-  <button id="startGame" class="w-100 btn btn-lg btn-primary" onclick="window.twenty48Game.startGame()"
-    disabled="disabled">Start Game</button>
-</div>
+@{
+    ViewData["Title"] = "2048 Game";
+}
 
-<div id="gameContainer" hidden="hidden">
-  <div id="gameArea">
-    <div id="score">Score: <span id="scoreValue"></span></div>
-    <div id="gameBoard">
-      <div id="cells"></div>
-      <div id="gameOver">Game Over</div>
-    </div>
-  </div>
+<div class="container">
+    <main role="main" class="pb-3" id="mainContainer">
+        <div id="app"></div>
+    </main>
 </div>
 
-<div id="debugArea" class="accordion" id="accordionExample" style="margin-top:50px">
-  <div class="accordion-item">
-    <h2 class="accordion-header">
-      <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne"
-        aria-expanded="true" aria-controls="collapseTwo">
-        Layout Data
-      </button>
-    </h2>
-    <div id="collapseOne" class="accordion-collapse collapse">
-      <div class="accordion-body">
-        <div id="layoutData">
-        </div>
-      </div>
-    </div>
-  </div>
-  <div class="accordion-item">
-    <h2 class="accordion-header">
-      <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo"
-        aria-expanded="true" aria-controls="collapseTwo">
-        Debug Log
-      </button>
-    </h2>
-    <div id="collapseTwo" class="accordion-collapse collapse">
-      <div class="accordion-body">
-        <div id="debugLog">
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-
-<div class="toast-container position-fixed top-50 start-50 translate-middle p-3">
-  <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-bs-autohide="true"
-    data-bs-delay="5000" data-bs-animation="true">
-    <div class="toast-header">
-      <strong class="me-auto">Oops!</strong>
-      <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-    </div>
-    <div class="toast-body" id="errorMessageBody">
-    </div>
-  </div>
-</div>
-
-<script type="text/javascript" src="/dist/boardcutter-bundle.js"></script>
-
-<script>
-  const toastLiveExample = document.getElementById('liveToast');
-
-  document.addEventListener("DOMContentLoaded", function () {
-    window.twenty48Game.initGame("score",
-      "debugLog",
-      "gameBoard",
-      "newGame",
-      "gameContainer",
-      "gameArea",
-      "gameOver",
-      "layoutData",
-      "debugLog",
-      () => {
-        console.log('ready called');
-        const startElement = document.getElementById('startGame');
-        startElement.innerText = "Start Game!!!";
-        startElement.disabled = "";
-      },
-      (errorMessage) => {
-        document.getElementById('errorMessageBody').textContent = errorMessage;
-        const toastBootstrap = bootstrap.Toast.getOrCreateInstance(toastLiveExample);
-        toastBootstrap.show();
-      });
-  });
-</script>
-
+@section Scripts {
+    @if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
+    {
+        <!-- In development, load from Vite dev server -->
+        <script type="module" src="http://localhost:5173/src/main.ts"></script>
+    }
+    else
+    {
+        <!-- In production, load the built bundle -->
+        <script type="module" src="~/dist/assets/main.js"></script>
+    }
+}
