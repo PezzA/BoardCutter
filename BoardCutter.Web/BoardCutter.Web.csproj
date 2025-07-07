@@ -27,11 +27,20 @@
     <_ContentIncludedByDefault Remove="boardcutter-client\tsconfig.json" />
     <_ContentIncludedByDefault Remove="boardcutter-client\tsconfig.node.json" />
     <_ContentIncludedByDefault Remove="clientapp\src\tsconfig.json" />
+    <_ContentIncludedByDefault Remove="wwwroot\dist\assets\main.css" />
+    <_ContentIncludedByDefault Remove="wwwroot\dist\assets\main.js" />
+    <_ContentIncludedByDefault Remove="wwwroot\dist\vite.svg" />
   </ItemGroup>
 
   <!-- Include the client app files -->
   <ItemGroup>
     <Content Include="$(SpaRoot)dist\**" CopyToOutputDirectory="PreserveNewest" />
+    <Content Update="wwwroot\dist\assets\main.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\dist\assets\main.css">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
   <Target Name="DebugEnsureNodeEnv" BeforeTargets="Build" Condition=" '$(Configuration)' == 'Debug' And !Exists('$(SpaRoot)node_modules') ">

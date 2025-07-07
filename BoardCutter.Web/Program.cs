@@ -142,10 +142,9 @@ if (Directory.Exists(clientDistPath))
 app.MapHealthChecks("/health");
 app.MapHub<Twenty48Hub>("/twenty48hub");
 app.MapHub<GameLobbyHub>("/gamelobbyhub");
-app.MapStaticAssets();
+app.UseStaticFiles(); // Use regular static files instead
 app.MapControllers();
-app.MapRazorPages()
-   .WithStaticAssets();
+app.MapRazorPages(); // Remove .WithStaticAssets()
 
 // Fallback for client-side routing - serve index.html for any non-API routes (only if dist exists)
 if (Directory.Exists(clientDistPath))

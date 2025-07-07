@@ -176,7 +176,7 @@
 
     {#if status === 0}
         {#if connectionStatus === 'connected'}
-            <button on:click={startNewGame} style="min-width:150px">Start new Game</button>
+            <button on:click={startNewGame} style="min-width:150px">Start new Game!!!</button>
         {/if}
         
     {:else}

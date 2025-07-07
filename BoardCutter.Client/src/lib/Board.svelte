@@ -231,11 +231,16 @@
 
             if (cell.Destroy === true) {
                 const cellElement = document.getElementById(getCellId(cell.Id));
-                cellElement.style.opacity = "0";
+                
+                if(cellElement) {
+                    cellElement.style.opacity = "0";
+                    
+                    setTimeout(function () {
+                        grid.removeChild(cellElement);
+                    }, 50)
+                }
+                
 
-                setTimeout(function () {
-                    grid.removeChild(cellElement);
-                }, 50)
             }
             if (cell.New || cell.Destroy) {
                 return;

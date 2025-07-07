@@ -1,4 +1,5 @@
 ﻿@page
+@inject IWebHostEnvironment Environment
 @{
     ViewData["Title"] = "2048 Game";
 }
@@ -10,14 +11,13 @@
 </div>
 
 @section Scripts {
-    @if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
+    @if (Environment.IsDevelopment())
     {
-        <!-- In development, load from Vite dev server -->
         <script type="module" src="http://localhost:5173/src/main.ts"></script>
     }
     else
     {
-        <!-- In production, load the built bundle -->
         <script type="module" src="~/dist/assets/main.js"></script>
+        <link rel="stylesheet" href="~/dist/assets/main.css" />
     }
 }

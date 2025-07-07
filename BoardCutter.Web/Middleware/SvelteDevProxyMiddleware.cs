@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using Microsoft.Extensions.Logging;
 
 namespace BoardCutter.Web.Middleware
 {
@@ -7,10 +8,12 @@ namespace BoardCutter.Web.Middleware
         private readonly RequestDelegate _next;
         private readonly string _svelteDevServerUrl;
         private readonly HttpClient _httpClient;
+        private readonly ILogger<SvelteDevProxyMiddleware> _logger;
 
-        public SvelteDevProxyMiddleware(RequestDelegate next, string svelteDevServerUrl = "http://localhost:5173")
+        public SvelteDevProxyMiddleware(RequestDelegate next, ILogger<SvelteDevProxyMiddleware> logger, string svelteDevServerUrl = "http://localhost:5173")
         {
             _next = next;
+            _logger = logger;
             _svelteDevServerUrl = svelteDevServerUrl;
             _httpClient = new HttpClient();
         }
@@ -20,6 +23,10 @@ namespace BoardCutter.Web.Middleware
             // Only proxy in development and for non-API routes
             if (ShouldProxy(context))
             {
+                _logger.LogInformation("Proxying request {Method} {Path} to Svelte dev server at {SvelteUrl}", 
+                    context.Request.Method, 
+                    context.Request.Path, 
+                    _svelteDevServerUrl);
                 await ProxyToSvelteDevServer(context);
                 return;
             }
@@ -65,6 +72,7 @@ namespace BoardCutter.Web.Middleware
             try
             {
                 var requestUri = $"{_svelteDevServerUrl}{context.Request.Path}{context.Request.QueryString}";
+                _logger.LogDebug("Sending proxied request to: {RequestUri}", requestUri);
                 
                 using var requestMessage = new HttpRequestMessage(
                     new HttpMethod(context.Request.Method), 
@@ -91,6 +99,10 @@ namespace BoardCutter.Web.Middleware
 
                 using var responseMessage = await _httpClient.SendAsync(requestMessage);
                 
+                _logger.LogDebug("Received response from Svelte dev server: {StatusCode} for {Path}", 
+                    responseMessage.StatusCode, 
+                    context.Request.Path);
+
                 // Copy response status
                 context.Response.StatusCode = (int)responseMessage.StatusCode;
 
@@ -118,8 +130,13 @@ namespace BoardCutter.Web.Middleware
                     await responseMessage.Content.CopyToAsync(context.Response.Body);
                 }
             }
-            catch (HttpRequestException)
+            catch (HttpRequestException ex)
             {
+                _logger.LogError(ex, "Failed to proxy request {Method} {Path} to Svelte dev server at {SvelteUrl}", 
+                    context.Request.Method, 
+                    context.Request.Path, 
+                    _svelteDevServerUrl);
+                
                 // If Svelte dev server is not running, fall back to serving static files
                 context.Response.StatusCode = 404;
                 await context.Response.WriteAsync("Svelte dev server not available. Please run 'npm run dev' in the BoardCutter.Client folder.");
