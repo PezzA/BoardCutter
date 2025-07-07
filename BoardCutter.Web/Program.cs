@@ -112,8 +112,6 @@ if (!app.Environment.IsDevelopment())
 
 // app.UseHttpsRedirection();
 
-// Use CORS policy before routing
-app.UseCors("Localhost5173Policy");
 
 // Add BoardCutter cookie middleware
 app.UseMiddleware<BoardCutterCookieMiddleware>();
@@ -122,6 +120,7 @@ app.UseMiddleware<BoardCutterCookieMiddleware>();
 if (app.Environment.IsDevelopment())
 {
     app.UseMiddleware<SvelteDevProxyMiddleware>();
+    app.UseCors("Localhost5173Policy");
 }
 
 app.UseRouting();
@@ -140,11 +139,13 @@ if (Directory.Exists(clientDistPath))
 }
 
 app.MapHealthChecks("/health");
+
 app.MapHub<Twenty48Hub>("/twenty48hub");
 app.MapHub<GameLobbyHub>("/gamelobbyhub");
-app.UseStaticFiles(); // Use regular static files instead
+
+app.UseStaticFiles();
 app.MapControllers();
-app.MapRazorPages(); // Remove .WithStaticAssets()
+app.MapRazorPages();
 
 // Fallback for client-side routing - serve index.html for any non-API routes (only if dist exists)
 if (Directory.Exists(clientDistPath))
