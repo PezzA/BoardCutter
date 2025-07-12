@@ -124,7 +124,7 @@
   {#if status === 0}
     <div>Loading</div>
   {:else}
-    <Board {cells} {score} {gameId} {connection} />
+    <Board {cells} {score} {gameId} {connection} {status} />
   {/if}
 </main>
 

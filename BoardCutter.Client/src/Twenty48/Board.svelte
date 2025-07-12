@@ -1,7 +1,7 @@
 ﻿<script lang="ts">
   import { onMount } from "svelte";
 
-  let { cells = [], score = 0, gameId, connection } = $props();
+  let { cells = [], score = 0, gameId, connection, status = 0 } = $props();
 
   const cellWidth = 75;
   const cellMargin = 5;
@@ -99,6 +99,16 @@
         );
       });
     }
+  }
+
+  function tryAgain() {
+    connection.invoke("StartNew").catch(function (err: Error) {
+      console.error("Failed to start new game:", err);
+    });
+  }
+
+  function simulateGameEnd() {
+    status = 3;
   }
 
   function toPixels(input: number): number {
@@ -270,12 +280,23 @@
     ontouchend={handleTouchEnd}
   >
     <div class="score">Score: {score}</div>
+    <div class="status">Status: {status}</div>
     <div
       class="grid"
       id="grid"
       class:locked={animLocked}
       class:unlocked={!animLocked}
+      class:game-over={status === 3}
     ></div>
+
+    {#if status === 3}
+      <div class="game-over-message">Game Over</div>
+      <button class="play-again-button" onclick={tryAgain}>Play Again</button>
+    {/if}
+
+    <button class="debug-button" onclick={simulateGameEnd}
+      >Simulate Game End</button
+    >
   </div>
 {/if}
 
@@ -385,5 +406,57 @@
   :global(.cell-256) {
     color: #f9f6f2;
     background: #edcc62;
+  }
+
+  .grid.game-over {
+    opacity: 0.3;
+    filter: grayscale(50%);
+    pointer-events: none;
+  }
+
+  .game-over-message {
+    text-align: center;
+    font-size: 2rem;
+    font-weight: bold;
+    color: #333;
+    margin: 1rem 0;
+  }
+
+  .play-again-button {
+    display: block;
+    margin: 1rem auto;
+    background-color: #4caf50;
+    color: white;
+    border: none;
+    padding: 0.75rem 2rem;
+    font-size: 1.1rem;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+
+  .play-again-button:hover {
+    background-color: #45a049;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  }
+
+  .debug-button {
+    display: block;
+    margin: 0.5rem auto;
+    background-color: #ff9800;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    opacity: 0.7;
+  }
+
+  .debug-button:hover {
+    background-color: #f57c00;
+    opacity: 1;
   }
 </style>
