@@ -3,9 +3,18 @@
 
   let { cells = [], score = 0, gameId, connection } = $props();
 
-  let cellWidth = 75;
-  let cellMargin = 5;
-  let gridWidth = 4;
+  const cellWidth = 75;
+  const cellMargin = 5;
+  const gridWidth = 4;
+
+  const animationNewCellDelayMs = 100;
+  const animationNewCellRevertMs = 300;
+  const animationRemoveCellDelayMs = 50;
+  // Whilst animating, input is locked, so we are not updating state whilst still
+  // animateing from the previous state.
+  const animationLockoutDurationMs = 300; // milliseconds
+
+  let animLocked = $state(false);
 
   // First Draw
   onMount(() => {
@@ -16,7 +25,7 @@
       return;
     }
 
-    let gridWidthPX: number = 4 * cellWidth + 5 * cellMargin;
+    let gridWidthPX: number = 4 * cellWidth + 5 * cellMargin + 5;
 
     grid.style.height = gridWidthPX + "px";
     grid.style.width = gridWidthPX + "px";
@@ -25,6 +34,7 @@
 
     console.log("Board component mounted with grid size:", gridWidthPX);
   });
+
   function drawGrid(grid: HTMLDivElement) {
     for (let x = 0; x < gridWidth; x++) {
       for (let y = 0; y < gridWidth; y++) {
@@ -35,6 +45,11 @@
 
   // Update Logic
   $effect(() => {
+    animLocked = true;
+    setTimeout(() => {
+      animLocked = false;
+    }, animationLockoutDurationMs);
+
     drawCells();
   });
 
@@ -46,7 +61,6 @@
 
   function handleTouchStart(e: TouchEvent) {
     if (e.touches.length === 1) {
-      e.preventDefault();
       touchStartX = e.touches[0].clientX;
       touchStartY = e.touches[0].clientY;
     }
@@ -121,6 +135,8 @@
 
   function keydown(e: KeyboardEvent) {
     if (e.repeat) return;
+
+    if (animLocked) return;
 
     if (
       e.key === "ArrowUp" ||
@@ -216,9 +232,9 @@
           if (!cell.Merged) {
             setTimeout(function () {
               cellElement.classList.remove("newCell");
-            }, 300);
+            }, animationNewCellRevertMs);
           }
-        }, 100);
+        }, animationNewCellDelayMs);
       }
 
       if (cell.Destroy === true) {
@@ -229,7 +245,7 @@
 
           setTimeout(function () {
             grid.removeChild(cellElement);
-          }, 50);
+          }, animationRemoveCellDelayMs);
         }
       }
       if (cell.New || cell.Destroy) {
@@ -248,6 +264,8 @@
     <div
       class="grid"
       id="grid"
+      class:locked={animLocked}
+      class:unlocked={!animLocked}
       ontouchstart={handleTouchStart}
       ontouchend={handleTouchEnd}
     ></div>
@@ -272,6 +290,18 @@
     margin: 1rem 0;
     background-color: #bbada0;
     position: relative;
+    border: 3px solid transparent;
+    border-radius: 5px;
+    transition: border-color 0.3s ease;
+    box-sizing: border-box;
+  }
+
+  .grid.locked {
+    border-color: #ffb300; /* amber border when locked */
+  }
+
+  .grid.unlocked {
+    border-color: #4caf50; /* green border when unlocked */
   }
 
   :global(.cell) {

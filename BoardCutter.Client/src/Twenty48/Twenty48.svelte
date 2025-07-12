@@ -2,8 +2,8 @@
   import { onMount } from "svelte";
   import * as signalR from "@microsoft/signalr";
   // @ts-ignore - Svelte component import
-  import LoggerPanel from "./lib/Logger.svelte";
-  import Board from "./lib/Board.svelte";
+  import LoggerPanel from "../Shared/Logger.svelte";
+  import Board from "./Board.svelte";
 
   // Using regular variables in Svelte 5
   let connection: signalR.HubConnection | null = null;
