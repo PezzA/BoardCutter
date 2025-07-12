@@ -2,7 +2,6 @@
   import { onMount } from "svelte";
   import * as signalR from "@microsoft/signalr";
   // @ts-ignore - Svelte component import
-  import LoggerPanel from "../Shared/Logger.svelte";
   import Board from "./Board.svelte";
 
   // Using regular variables in Svelte 5
@@ -16,31 +15,6 @@
   let score: number = 0;
   let status = 0;
   let gameId: string = "";
-
-  let loggerPanelRef: any = null;
-  let showLogger = false;
-  let userFromSetPlayerGame: string = "";
-
-  function pushLog(text: string, cssClass: string) {
-    if (loggerPanelRef && loggerPanelRef.addMessage) {
-      loggerPanelRef.addMessage({ text, cssClass });
-    }
-  }
-
-  function toggleLogger() {
-    showLogger = !showLogger;
-  }
-
-  function copyToClipboard(text: string) {
-    navigator.clipboard
-      .writeText(text)
-      .then(() => {
-        pushLog("User value copied to clipboard", "log-debug");
-      })
-      .catch((err) => {
-        pushLog("Failed to copy user value: " + err, "log-error");
-      });
-  }
 
   async function connectToSignalR(): Promise<void> {
     connection = new signalR.HubConnectionBuilder()
@@ -59,41 +33,31 @@
         const data =
           typeof message === "string" ? JSON.parse(message) : message;
         if (data && data.GameId) {
-          // Store the user value from the message
-          userFromSetPlayerGame = data.User || "";
-
           const url = new URL(window.location.href);
           url.searchParams.set("gameid", data.GameId);
-          window.location.href = url.toString();
+
+          // Update URL without reloading the page
+          history.pushState(null, "", url.toString());
         }
       } catch (err) {
-        pushLog("Failed to handle SetPlayerGame: " + err, "log-error");
+        console.error("Failed to handle SetPlayerGame: " + err);
       }
     });
 
     connection.on("PublicVisible", (message: any) => {
       try {
         const data = JSON.parse(message);
-        pushLog("PublicVisible: " + message, "log-down");
 
         cells = data.Cells;
-
         score = data.Score;
-
         status = data.Status;
         gameId = data.GameId;
 
-        pushLog("PubVisible: Done", "log-debug");
-
         if (data.Status === 3) {
-          pushLog("End of Game", "log-debug");
-
-          //that.windowElements.gameBoard.style.opacity = "0.3";
-          //that.removeEventListeners();
-          //that.windowElements.gameOver.style.opacity = "1";
+          console.log("End of Game");
         }
       } catch (err) {
-        pushLog("Failed to handle PublicVisible: " + err, "log-error");
+        console.error("Failed to handle PublicVisible: " + err);
       }
     });
 
@@ -121,26 +85,14 @@
 
       try {
         await connection.invoke("CheckPlayerStatus", gameId);
-        pushLog("CheckPlayerStatus called with gameId: " + gameId, "log-up");
+        console.log("CheckPlayerStatus called with gameId: " + gameId);
       } catch (err) {
-        pushLog("Failed to call CheckPlayerStatus: " + err, "log-error");
+        console.error("Failed to call CheckPlayerStatus: " + err);
       }
     } catch (err) {
       connectionStatus = "error";
-      pushLog("SignalR connection error: " + err, "log-error");
+      console.error("SignalR connection error: " + err);
     }
-
-    /*
-      if (gameId === "") {
-        console.log("No gameId found in query string, starting new game");
-        await startNewGame();
-      } else {
-    } catch (err) {
-      connectionStatus = "error";
-      pushLog("SignalR connection error: " + err, "log-error");
-    }
-      }
-*/
   }
 
   async function startNewGame(): Promise<void> {
@@ -161,41 +113,25 @@
 </script>
 
 <main class="game-window">
-  <div class="status">SignalR status: {connectionStatus}</div>
+  <div
+    class="status-bar"
+    class:connected={connectionStatus === "connected"}
+    class:reconnecting={connectionStatus === "reconnecting"}
+    class:disconnected={connectionStatus === "disconnected" ||
+      connectionStatus === "error"}
+  ></div>
 
   {#if status === 0}
     <div>Loading</div>
   {:else}
     <Board {cells} {score} {gameId} {connection} />
   {/if}
-
-  {#if showLogger}
-    <div class="cookie-section">
-      <div class="cookie-info">
-        <strong>User (from SetPlayerGame):</strong>
-        <span class="cookie-value"
-          >{userFromSetPlayerGame || "Not received yet"}</span
-        >
-        <button
-          class="copy-button"
-          on:click={() => copyToClipboard(userFromSetPlayerGame)}
-          disabled={!userFromSetPlayerGame}
-        >
-          Copy
-        </button>
-      </div>
-    </div>
-    <LoggerPanel bind:this={loggerPanelRef} />
-  {/if}
-
-  <footer>
-    <button class="debug-link" on:click={toggleLogger}>
-      {showLogger ? "Hide Debug" : "Show Debug"}
-    </button>
-  </footer>
 </main>
 
 <style>
+  .game-window {
+    margin: 0;
+  }
   :global(body) {
     margin: 0;
     min-height: 100vh;
@@ -224,10 +160,47 @@
     border-radius: 10px;
     border-color: red;
     border-width: 10px;
+    text-align: center;
   }
 
-  .status {
-    margin-bottom: 1em;
+  .status-bar {
+    height: 4px;
+    width: 100vw;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+    transition: background-color 0.3s ease;
+  }
+
+  .status-bar.connected {
+    background: linear-gradient(
+      to right,
+      rgba(255, 255, 255, 1) 0%,
+      #4caf50 60px,
+      #4caf50 calc(100% - 60px),
+      rgba(255, 255, 255, 1) 100%
+    );
+  }
+
+  .status-bar.reconnecting {
+    background: linear-gradient(
+      to right,
+      rgba(255, 255, 255, 1) 0%,
+      #ffb300 60px,
+      #ffb300 calc(100% - 60px),
+      rgba(255, 255, 255, 1) 100%
+    );
+  }
+
+  .status-bar.disconnected {
+    background: linear-gradient(
+      to right,
+      rgba(255, 255, 255, 1) 0%,
+      #f44336 60px,
+      #f44336 calc(100% - 60px),
+      rgba(255, 255, 255, 1) 100%
+    );
   }
 
   @keyframes spin {
@@ -237,71 +210,5 @@
     100% {
       transform: rotate(360deg);
     }
-  }
-
-  footer {
-    margin-top: 2rem;
-    text-align: center;
-    padding: 1rem 0;
-  }
-
-  .debug-link {
-    background: none;
-    border: none;
-    color: #666;
-    cursor: pointer;
-    font-size: 0.9rem;
-    text-decoration: underline;
-    padding: 0.5rem 1rem;
-  }
-
-  .debug-link:hover {
-    color: #333;
-    background-color: #f5f5f5;
-    border-radius: 4px;
-  }
-
-  .cookie-section {
-    background-color: #f8f9fa;
-    border: 1px solid #dee2e6;
-    border-radius: 4px;
-    padding: 1rem;
-    margin-bottom: 1rem;
-  }
-
-  .cookie-info {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-  }
-
-  .cookie-value {
-    font-family: monospace;
-    background-color: #e9ecef;
-    padding: 0.25rem 0.5rem;
-    border-radius: 3px;
-    word-break: break-all;
-    flex: 1;
-    min-width: 200px;
-  }
-
-  .copy-button {
-    background-color: #007bff;
-    color: white;
-    border: none;
-    padding: 0.25rem 0.75rem;
-    border-radius: 3px;
-    cursor: pointer;
-    font-size: 0.875rem;
-  }
-
-  .copy-button:hover:not(:disabled) {
-    background-color: #0056b3;
-  }
-
-  .copy-button:disabled {
-    background-color: #6c757d;
-    cursor: not-allowed;
   }
 </style>

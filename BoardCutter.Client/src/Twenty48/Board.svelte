@@ -193,7 +193,7 @@
       node.innerText = value.toString();
     }
 
-    node.style.zIndex = isBase ? 0 : id.toString();
+    node.style.zIndex = isBase ? "0" : id.toString();
     node.style.top = toPixels(y) + "px";
     node.style.left = toPixels(x) + "px";
     node.style.width = width + "px";
@@ -206,7 +206,12 @@
     const grid = document.getElementById("grid");
 
     if (cells.length === 0) {
-      push("drawCells: No cells to draw");
+      console.log("drawCells: No cells to draw");
+      return;
+    }
+
+    if (!grid) {
+      console.error("Grid element not found");
       return;
     }
 
@@ -276,8 +281,9 @@
 
 <style>
   .game-board {
-    margin-top: 1rem;
+    margin: 1rem auto 0;
     touch-action: none;
+    display: inline-block;
   }
 
   .score {
