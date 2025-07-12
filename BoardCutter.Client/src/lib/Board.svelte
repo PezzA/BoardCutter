@@ -46,6 +46,7 @@
 
   function handleTouchStart(e: TouchEvent) {
     if (e.touches.length === 1) {
+      e.preventDefault();
       touchStartX = e.touches[0].clientX;
       touchStartY = e.touches[0].clientY;
     }
@@ -53,6 +54,7 @@
 
   function handleTouchEnd(e: TouchEvent) {
     if (e.changedTouches.length === 1) {
+      e.preventDefault();
       touchEndX = e.changedTouches[0].clientX;
       touchEndY = e.changedTouches[0].clientY;
       handleSwipe();
