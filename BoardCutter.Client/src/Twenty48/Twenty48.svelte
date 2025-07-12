@@ -97,6 +97,19 @@
       }
     });
 
+    connection.on("PlayerStatus", async (message: any) => {
+      console.log("PlayerStatus: " + message);
+
+      const urlParams = new URLSearchParams(window.location.search);
+      const gameId = urlParams.get("gameid") || "";
+      console.log("GameId from query string: " + gameId);
+
+      if (gameId === "") {
+        console.log("No gameId found in query string, starting new game");
+        await startNewGame();
+      }
+    });
+
     try {
       await connection.start();
       connectionStatus = "connected";
@@ -104,6 +117,7 @@
       // Get gameid from query string if it exists, else empty string
       const urlParams = new URLSearchParams(window.location.search);
       const gameId = urlParams.get("gameid") || "";
+      console.log("GameId from query string: " + gameId);
 
       try {
         await connection.invoke("CheckPlayerStatus", gameId);
@@ -115,6 +129,18 @@
       connectionStatus = "error";
       pushLog("SignalR connection error: " + err, "log-error");
     }
+
+    /*
+      if (gameId === "") {
+        console.log("No gameId found in query string, starting new game");
+        await startNewGame();
+      } else {
+    } catch (err) {
+      connectionStatus = "error";
+      pushLog("SignalR connection error: " + err, "log-error");
+    }
+      }
+*/
   }
 
   async function startNewGame(): Promise<void> {
@@ -138,11 +164,7 @@
   <div class="status">SignalR status: {connectionStatus}</div>
 
   {#if status === 0}
-    {#if connectionStatus === "connected"}
-      <button on:click={startNewGame} style="min-width:150px"
-        >Start new Game!!!</button
-      >
-    {/if}
+    <div>Loading</div>
   {:else}
     <Board {cells} {score} {gameId} {connection} />
   {/if}

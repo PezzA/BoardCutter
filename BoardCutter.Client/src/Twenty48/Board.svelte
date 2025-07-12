@@ -259,15 +259,17 @@
 
 <!-- Show game board if available -->
 {#if cells.length > 0}
-  <div class="game-board">
+  <div
+    class="game-board"
+    ontouchstart={handleTouchStart}
+    ontouchend={handleTouchEnd}
+  >
     <div class="score">Score: {score}</div>
     <div
       class="grid"
       id="grid"
       class:locked={animLocked}
       class:unlocked={!animLocked}
-      ontouchstart={handleTouchStart}
-      ontouchend={handleTouchEnd}
     ></div>
   </div>
 {/if}
@@ -275,6 +277,7 @@
 <style>
   .game-board {
     margin-top: 1rem;
+    touch-action: none;
   }
 
   .score {
