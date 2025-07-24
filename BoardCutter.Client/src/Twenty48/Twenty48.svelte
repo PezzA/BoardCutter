@@ -41,7 +41,7 @@
     connection.onclose(() => (connectionStatus = "disconnected"));
     connection.onreconnecting(() => (connectionStatus = "reconnecting"));
     connection.onreconnected(() => (connectionStatus = "connected"));
-
+  
     connection.on("SetPlayerGame", (message: any) => {
       try {
         const data =
