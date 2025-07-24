@@ -1,3 +1,3 @@
 # BoardCutter
 
-.net based game server
+.net/svelte personal project hub site!
