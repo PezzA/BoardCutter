@@ -1,5 +1,6 @@
 ﻿@page
 @model IndexModel
+@inject IWebHostEnvironment Environment
 @{
     ViewData["Title"] = "Home page";
 }
@@ -7,3 +8,22 @@
 <div class="text-center">
     <h1 class="display-4">Welcome to BoardCutter</h1>
 </div>
+
+<div class="container">
+    <main role="main" class="pb-3" id="mainContainer">
+        <div id="app"></div>
+    </main>
+</div>
+
+@section Scripts {
+    @if (Environment.IsDevelopment())
+    {
+        <script type="module" src="http://localhost:5173/src/main.ts"></script>
+    }
+    else
+    {
+        <script type="module" src="~/dist/assets/main.js"></script>
+        <link rel="stylesheet" href="~/dist/assets/main.css" />
+    }
+}
+

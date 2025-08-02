@@ -1,6 +1,7 @@
 ﻿<script lang="ts">
   import { onMount } from "svelte";
   import * as signalR from "@microsoft/signalr";
+  import StatusBar from "../Shared/StatusBar.svelte";
 
   // SignalR connection variables
   let connection: signalR.HubConnection | null = $state(null);
@@ -361,13 +362,7 @@
 <svelte:window onkeydown={keydown} />
 
 <main class="game-window">
-  <div
-    class="status-bar"
-    class:connected={connectionStatus === "connected"}
-    class:reconnecting={connectionStatus === "reconnecting"}
-    class:disconnected={connectionStatus === "disconnected" ||
-      connectionStatus === "error"}
-  ></div>
+  <StatusBar {connectionStatus} />
 
   {#if status === 0}
     <div>Loading</div>
