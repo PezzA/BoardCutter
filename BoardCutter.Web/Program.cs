@@ -12,6 +12,7 @@ using BoardCutter.Web.Hubs;
 using BoardCutter.Web.Middleware;
 
 using Microsoft.AspNetCore.SignalR;
+using Yarp.ReverseProxy;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -53,7 +54,15 @@ builder.Services.AddAkka("MyActorSystem", configurationBuilder => configurationB
                         resolver.GetService<IHubContext<Twenty48Hub>>(),
                         resolver.GetService<IPlayerService>())),
                 "2048HubWriter");
-        
+
+        var lobbyHubWriter =
+            system.ActorOf(
+                Props.Create(() =>
+                    new HubClientWriter<GameLobbyHub>(
+                        resolver.GetService<IHubContext<GameLobbyHub>>(),
+                        resolver.GetService<IPlayerService>())),
+                "LobbyHubWriter");
+
         var gameActors = new Dictionary<string, Props>
         {
             {
@@ -61,13 +70,13 @@ builder.Services.AddAkka("MyActorSystem", configurationBuilder => configurationB
                 Props.Create(() =>  new GameActor(twenty48HubWriter, new RandomTilePlacer()))
             }
         };
-        
+
         var gameManagerActor =
             system.ActorOf(
                 Props.Create(
-                    () => new GameManager(gameActors)),
+                    () => new GameManager(gameActors, lobbyHubWriter)),
                 "GameManagerActor");
-        
+
         registry.Register<GameManager>(gameManagerActor);
     }));
 
@@ -85,6 +94,13 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddRazorPages();
+
+// Add YARP reverse proxy for Vite dev server (development only)
+if (builder.Environment.IsDevelopment())
+{
+    builder.Services.AddReverseProxy()
+        .LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"));
+}
 
 builder.Services.Configure<CookiePolicyOptions>(options =>
 {
@@ -116,10 +132,9 @@ if (!app.Environment.IsDevelopment())
 // Add BoardCutter cookie middleware
 app.UseMiddleware<BoardCutterCookieMiddleware>();
 
-// Add Svelte dev proxy middleware in development
+// Add CORS for Vite dev server in development
 if (app.Environment.IsDevelopment())
 {
-    app.UseMiddleware<SvelteDevProxyMiddleware>();
     app.UseCors("Localhost5173Policy");
 }
 
@@ -146,6 +161,12 @@ app.MapHub<GameLobbyHub>("/gamelobbyhub");
 app.UseStaticFiles();
 app.MapControllers();
 app.MapRazorPages();
+
+// Map YARP reverse proxy routes for Vite dev server (development only)
+if (app.Environment.IsDevelopment())
+{
+    app.MapReverseProxy();
+}
 
 // Fallback for client-side routing - serve index.html for any non-API routes (only if dist exists)
 if (Directory.Exists(clientDistPath))

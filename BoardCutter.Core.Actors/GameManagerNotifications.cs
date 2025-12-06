@@ -4,7 +4,7 @@ namespace BoardCutter.Core.Actors;
 
 public class GameManagerNotifications
 {
-    public record BaseGameNotification(string Id, string Title, string Tag, GameStatus Status, Player[] Players);
+    public record BaseGameNotification(string Id, string Title, string Tag, GameStatus Status, Player[] Players, int Score);
 
     public record GameCreated(BaseGameNotification Details);
 

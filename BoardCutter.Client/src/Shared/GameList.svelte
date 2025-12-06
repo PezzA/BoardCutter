@@ -1,86 +1,58 @@
 ﻿<script lang="ts">
   import { onMount, onDestroy } from "svelte";
-  import * as signalR from "@microsoft/signalr";
   import StatusBar from "./StatusBar.svelte";
+  import GameCard from "./GameCard.svelte";
+  import {
+    createReactiveSignalRConnection,
+    type ConnectionStatus,
+  } from "./signalr.js";
 
   // Game list state
   let games = $state<any[]>([]);
-  let connection: signalR.HubConnection | null = $state(null);
-  let connectionStatus = $state<
-    "disconnected" | "reconnecting" | "connected" | "error"
-  >("disconnected");
   let loading = $state(true);
   let error = $state<string | null>(null);
+  let connectionStatus = $state<ConnectionStatus>("disconnected");
+
+  // Create SignalR connection
+  const signalRConnection = createReactiveSignalRConnection({
+    hubUrl: "/gamelobbyhub",
+    withCredentials: true,
+    automaticReconnect: true,
+  });
+
+  // Subscribe to status changes to update our reactive state
+  signalRConnection.onStatusChange((status) => {
+    connectionStatus = status;
+  });
 
   async function connectToGameLobbyHub(): Promise<void> {
     try {
-      connectionStatus = "reconnecting";
-
-      connection = new signalR.HubConnectionBuilder()
-        .withUrl("/gamelobbyhub", {
-          withCredentials: true,
-        })
-        .withAutomaticReconnect()
-        .build();
-
-      // Handle connection state changes
-      connection.onclose(() => {
-        connectionStatus = "disconnected";
-        console.log("GameLobbyHub connection closed");
-      });
-
-      connection.onreconnecting(() => {
-        connectionStatus = "reconnecting";
-        console.log("GameLobbyHub reconnecting...");
-      });
-
-      connection.onreconnected(() => {
-        connectionStatus = "connected";
-        console.log("GameLobbyHub reconnected");
-        requestGameList();
-      });
-
-      // Handle incoming game list updates
-      connection.on("GameListUpdated", (gameList: any[]) => {
+      // Set up event handlers before connecting
+      signalRConnection.on("GameListUpdated", (gameList: any[] | string) => {
         console.log("Received game list update:", gameList);
-        games = gameList || [];
+        // Handle both array (direct call) and string (broadcast) formats
+        if (typeof gameList === "string") {
+          try {
+            games = JSON.parse(gameList) || [];
+          } catch (err) {
+            console.error("Failed to parse game list:", err);
+            games = [];
+          }
+        } else {
+          games = gameList || [];
+        }
         loading = false;
       });
 
-      // Handle individual game updates
-      connection.on("GameUpdate", (gameData: any) => {
-        console.log("Received game update:", gameData);
-        // Update existing game or add new one
-        const gameIndex = games.findIndex((g) => g.id === gameData.id);
-        if (gameIndex >= 0) {
-          games[gameIndex] = gameData;
-        } else {
-          games = [...games, gameData];
-        }
-      });
+      // Connect to the hub
+      await signalRConnection.connect();
 
-      // Handle game removal
-      connection.on("GameRemoved", (gameId: string) => {
-        console.log("Game removed:", gameId);
-        games = games.filter((g) => g.id !== gameId);
-      });
+      // Join the GameLobby group to receive real-time updates
+      await signalRConnection.invoke("JoinLobby");
+      console.log("Joined GameLobby group for real-time updates");
 
-      // Start the connection
-      await connection.start();
-      connectionStatus = "connected";
-      console.log("Connected to GameLobbyHub");
-
-      // Some hubs automatically send game list on connection, wait a moment
-      setTimeout(async () => {
-        if (games.length === 0) {
-          // Request the initial game list if not received automatically
-          await requestGameList();
-        } else {
-          loading = false;
-        }
-      }, 1000);
+      await requestGameList();
     } catch (err) {
-      connectionStatus = "error";
       error = `Failed to connect to GameLobbyHub: ${err}`;
       console.error("GameLobbyHub connection error:", err);
       loading = false;
@@ -88,10 +60,10 @@
   }
 
   async function requestGameList(): Promise<void> {
-    if (connection && connectionStatus === "connected") {
+    if (signalRConnection.connection && connectionStatus === "connected") {
       try {
         loading = true;
-        await connection.invoke("SendGameList");
+        await signalRConnection.invoke("SendGameList");
         console.log("Requested game list using SendGameList");
       } catch (err) {
         error = `Failed to request game list: ${err}`;
@@ -107,9 +79,9 @@
   }
 
   async function joinGame(gameId: string): Promise<void> {
-    if (connection && connectionStatus === "connected") {
+    if (signalRConnection.connection && connectionStatus === "connected") {
       try {
-        await connection.invoke("JoinGame", gameId);
+        await signalRConnection.invoke("JoinGame", gameId);
         console.log("Joined game:", gameId);
         // Navigate to game or handle join response
       } catch (err) {
@@ -124,10 +96,8 @@
   });
 
   onDestroy(() => {
-    if (connection) {
-      connection.stop();
-      console.log("GameLobbyHub connection stopped");
-    }
+    signalRConnection.disconnect();
+    console.log("GameLobbyHub connection stopped");
   });
 </script>
 
@@ -166,50 +136,7 @@
   {:else}
     <div class="games-grid">
       {#each games as game (game.id)}
-        <div class="game-card">
-          <div class="game-header">
-            <h3 class="game-title">
-              {game.title || `Game ${game.id}`}
-            </h3>
-            <span
-              class="game-status"
-              class:active={game.status === 1}
-              class:waiting={game.status === 0}
-              class:full={game.status === 2}
-            >
-              {game.status === 1
-                ? "active"
-                : game.status === 0
-                  ? "waiting"
-                  : game.status === 2
-                    ? "full"
-                    : "unknown"}
-            </span>
-          </div>
-
-          <div class="game-info">
-            <div class="info-row">
-              <span class="label">Players:</span>
-              <span class="value">{game.players?.length || 0}</span>
-            </div>
-
-            {#if game.players && game.players.length > 0}
-              <div class="info-row">
-                <span class="label">Host:</span>
-                <span class="value">{game.players[0].name || "Anonymous"}</span>
-              </div>
-            {/if}
-          </div>
-          <div class="game-actions">
-            <button
-              class="join-button"
-              onclick={() => joinGame(game.id)}
-              disabled={connectionStatus !== "connected" || game.status === 2}
-            >
-              {game.status === 2 ? "Full" : "Join Game"}
-            </button>
-          </div>
-        </div>
+        <GameCard {game} {connectionStatus} onJoinGame={joinGame} />
       {/each}
     </div>
   {/if}
@@ -291,99 +218,5 @@
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: 1rem;
-  }
-
-  .game-card {
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 1rem;
-    background-color: #fff;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    transition: box-shadow 0.3s ease;
-  }
-
-  .game-card:hover {
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-  }
-
-  .game-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 1rem;
-  }
-
-  .game-title {
-    margin: 0;
-    font-size: 1.2rem;
-    color: #333;
-  }
-
-  .game-status {
-    padding: 0.25rem 0.75rem;
-    border-radius: 15px;
-    font-size: 0.8rem;
-    font-weight: 500;
-    text-transform: uppercase;
-  }
-
-  .game-status.active {
-    background-color: #e8f5e8;
-    color: #2e7d32;
-  }
-
-  .game-status.waiting {
-    background-color: #fff3e0;
-    color: #f57c00;
-  }
-
-  .game-status.full {
-    background-color: #ffebee;
-    color: #c62828;
-  }
-
-  .game-info {
-    margin-bottom: 1rem;
-  }
-
-  .info-row {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 0.5rem;
-  }
-
-  .label {
-    font-weight: 500;
-    color: #666;
-  }
-
-  .value {
-    color: #333;
-  }
-
-  .game-actions {
-    display: flex;
-    gap: 0.5rem;
-  }
-
-  .join-button {
-    flex: 1;
-    background-color: #4caf50;
-    color: white;
-    border: none;
-    padding: 0.75rem;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 1rem;
-    transition: background-color 0.3s ease;
-  }
-
-  .join-button:hover:not(:disabled) {
-    background-color: #45a049;
-  }
-
-  .join-button:disabled {
-    background-color: #ccc;
-    cursor: not-allowed;
   }
 </style>

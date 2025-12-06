@@ -71,7 +71,11 @@ namespace BoardCutter.Games.Twenty48
         /// <returns></returns>
         public async Task StartNew()
         {
-            var player = await playerService.GetPlayerByConnectionId(Context.ConnectionId);
+            var loggedInUserName = Context.User?.Identity?.Name;
+
+            if (string.IsNullOrEmpty(loggedInUserName)) throw new InvalidDataException("Should have a user");
+
+            var player = await playerService.AddOrUpdatePlayer(loggedInUserName, Context.ConnectionId, true);
 
             if (player == null)
             {
