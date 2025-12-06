@@ -7,7 +7,8 @@
       "Bash(dotnet add:*)",
       "Bash(dotnet add reference:*)",
       "Bash(dotnet build:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(mkdir:*)"
     ],
     "deny": [],
     "ask": []

@@ -1,7 +1,7 @@
 ﻿@page
-@inject IWebHostEnvironment Environment
 @{
     ViewData["Title"] = "Stratagem Tester";
+    ViewData["SvelteEntry"] = "stratagems";
 }
 
 <div class="text-center">
@@ -9,6 +9,6 @@
 </div>
 <div class="container">
     <main role="main" class="pb-3" id="mainContainer">
-        <div id="app"></div>
+        <partial name="_SvelteApp" />
     </main>
 </div>

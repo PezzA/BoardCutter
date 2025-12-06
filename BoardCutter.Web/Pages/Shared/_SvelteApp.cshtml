@@ -1,0 +1,15 @@
+@inject IWebHostEnvironment Environment
+@{
+    var entryPoint = ViewData["SvelteEntry"] as string ?? "home";
+}
+
+<div id="app"></div>
+
+@if (Environment.IsDevelopment())
+{
+    <script type="module" src="http://localhost:5173/src/entries/@(entryPoint).ts"></script>
+}
+else
+{
+    <script type="module" src="~/dist/assets/@(entryPoint).js"></script>
+}
