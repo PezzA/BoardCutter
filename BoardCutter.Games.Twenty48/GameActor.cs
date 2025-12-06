@@ -37,7 +37,7 @@ public class GameActor : ReceiveActor
     {
         return _owner == null
             ? throw new InvalidGameStateException("No Owner detected")
-            : new(_gameId, "2048", "2048", _gameStatus, [_owner]);
+            : new(_gameId, "2048", "2048", _gameStatus, [_owner], _score);
     }
 
     public GameActor(IActorRef hubWriterActor, ITilePlacer tilePlacer)
@@ -153,6 +153,9 @@ public class GameActor : ReceiveActor
         {
             _gameStatus = GameStatus.Complete;
         }
+
+        // Notify GameManager of the updated game state (including score)
+        Context.Parent.Tell(new GameManagerNotifications.GameUpdated(GetBaseDetails()));
 
         BroadCastVisible();
     }

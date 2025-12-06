@@ -15,11 +15,13 @@ export default defineConfig({
         assetsDir: 'assets',
         rollupOptions: {
             input: {
-                main: './src/main.ts'
+                home: './src/entries/home.ts',
+                twenty48: './src/entries/twenty48.ts',
+                stratagems: './src/entries/stratagems.ts'
             },
             output: {
                 entryFileNames: 'assets/[name].js',
-                chunkFileNames: 'assets/[name].js',
+                chunkFileNames: 'assets/[name]-[hash].js',  // Add hash for shared chunks
                 assetFileNames: 'assets/[name].[ext]'
             }
         }

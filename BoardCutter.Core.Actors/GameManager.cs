@@ -5,13 +5,15 @@ namespace BoardCutter.Core.Actors;
 public class GameManager : ReceiveActor
 {
     private readonly Dictionary<string, Props> _gameActors;
+    private readonly IActorRef? _lobbyHubWriter;
 
     private readonly Dictionary<string, IActorRef> _gameActorList = [];
     private readonly Dictionary<string, GameManagerNotifications.BaseGameNotification> _gameDataList = [];
 
-    public GameManager(Dictionary<string, Props> gameActors)
+    public GameManager(Dictionary<string, Props> gameActors, IActorRef? lobbyHubWriter = null)
     {
         _gameActors = gameActors;
+        _lobbyHubWriter = lobbyHubWriter;
 
         // Game Notifications
         Receive<GameManagerNotifications.GameCreated>(GameCreated);
@@ -40,6 +42,7 @@ public class GameManager : ReceiveActor
     private void GameCreated(GameManagerNotifications.GameCreated message)
     {
         _gameDataList[message.Details.Id] = message.Details;
+        BroadcastGameListToLobby();
     }
 
     private async Task EndGame(GameManagerNotifications.GameEnded message)
@@ -53,6 +56,7 @@ public class GameManager : ReceiveActor
         await _gameActorList[id].GracefulStop(TimeSpan.FromSeconds(10));
         _gameActorList.Remove(id);
         _gameDataList.Remove(id);
+        BroadcastGameListToLobby();
     }
 
     private void GetGameList(GameManagerMessages.GetGameList message)
@@ -65,6 +69,7 @@ public class GameManager : ReceiveActor
     private void UpdateGame(GameManagerNotifications.GameUpdated message)
     {
         _gameDataList[message.Details.Id] = message.Details;
+        BroadcastGameListToLobby();
     }
 
     private void CreateGameRequest(GameManagerMessages.CreateGameRequest message)
@@ -87,5 +92,16 @@ public class GameManager : ReceiveActor
         }
 
         gameActor.Tell(message);
+    }
+
+    private void BroadcastGameListToLobby()
+    {
+        if (_lobbyHubWriter == null) return;
+
+        var gameList = _gameDataList.Select(entry => entry.Value).ToArray();
+        _lobbyHubWriter.Tell(new HubWriterMessages.WriteGroupObject(
+            "GameLobby",
+            "GameListUpdated",
+            gameList));
     }
 }

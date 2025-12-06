@@ -46,6 +46,7 @@ namespace BoardCutter.Web.Middleware
                 path == "/logout" ||
                 path == "/privacy" ||
                 path == "/callback" ||
+                path == "/stratagems" ||
                 path == "/twenty48")
             {
                 return false;

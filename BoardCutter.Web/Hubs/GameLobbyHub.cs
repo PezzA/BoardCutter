@@ -57,7 +57,7 @@ namespace BoardCutter.Web.Hubs
             // Game list will be updated automatically when GameCreated notification is received
         }
 
-        private async Task SendGameList()
+        public async Task SendGameList()
         {
             try
             {

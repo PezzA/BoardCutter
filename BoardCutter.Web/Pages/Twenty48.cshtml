@@ -1,23 +1,15 @@
 ﻿@page
-@inject IWebHostEnvironment Environment
 @{
     ViewData["Title"] = "2048 Game";
+    ViewData["SvelteEntry"] = "twenty48";
 }
+
+<div class="text-center">
+    <h1 class="display-4">2048</h1>
+</div>
 
 <div class="container">
     <main role="main" class="pb-3" id="mainContainer">
-        <div id="app"></div>
+        <partial name="_SvelteApp" />
     </main>
 </div>
-
-@section Scripts {
-    @if (Environment.IsDevelopment())
-    {
-        <script type="module" src="http://localhost:5173/src/main.ts"></script>
-    }
-    else
-    {
-        <script type="module" src="~/dist/assets/main.js"></script>
-        <link rel="stylesheet" href="~/dist/assets/main.css" />
-    }
-}

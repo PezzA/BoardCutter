@@ -1,25 +1,51 @@
-﻿<script lang="ts">
+<script lang="ts">
   import { onMount } from "svelte";
-  import * as signalR from "@microsoft/signalr";
+  import { fade } from "svelte/transition";
+  import { quintOut } from "svelte/easing";
+  import StatusBar from "../Shared/StatusBar.svelte";
+  import {
+    createReactiveSignalRConnection,
+    type ConnectionStatus,
+  } from "../Shared/signalr.js";
 
-  // SignalR connection variables
-  let connection: signalR.HubConnection | null = $state(null);
-  let connectionStatus = $state<
-    "disconnected" | "reconnecting" | "connected" | "error"
-  >("disconnected");
-  let cells = $state<number[][]>([]);
+  // TypeScript interfaces for game state
+  interface Point {
+    X: number;
+    Y: number;
+  }
+
+  interface Cell {
+    Id: number;
+    Value: number;
+    Point: Point;
+    New: boolean;
+    Merged: boolean;
+    Destroy: boolean;
+  }
+
+  // SignalR connection
+  const signalRConnection = createReactiveSignalRConnection({
+    hubUrl: "/twenty48hub",
+    withCredentials: true,
+    automaticReconnect: true,
+  });
+
+  // Game state
+  let connectionStatus = $state<ConnectionStatus>("disconnected");
+  let cells = $state<Cell[]>([]);
   let score = $state(0);
   let status = $state(0);
   let gameId = $state("");
+
+  // Subscribe to status changes
+  signalRConnection.onStatusChange((newStatus) => {
+    connectionStatus = newStatus;
+  });
 
   // Game board constants
   const cellWidth = 75;
   const cellMargin = 5;
   const gridWidth = 4;
-
-  const animationNewCellDelayMs = 100;
-  const animationNewCellRevertMs = 300;
-  const animationRemoveCellDelayMs = 50;
   const animationLockoutDurationMs = 300;
 
   let animLocked = $state(false);
@@ -27,168 +53,13 @@
   // Touch/Swipe variables
   let touchStartX = 0;
   let touchStartY = 0;
-  let touchEndX = 0;
-  let touchEndY = 0;
 
-  async function connectToSignalR(): Promise<void> {
-    connection = new signalR.HubConnectionBuilder()
-      .withUrl("/twenty48hub", {
-        withCredentials: true,
-      })
-      .withAutomaticReconnect()
-      .build();
+  // Computed grid size
+  const gridSizePx = gridWidth * cellWidth + (gridWidth + 1) * cellMargin;
 
-    connection.onclose(() => (connectionStatus = "disconnected"));
-    connection.onreconnecting(() => (connectionStatus = "reconnecting"));
-    connection.onreconnected(() => (connectionStatus = "connected"));
-
-    connection.on("SetPlayerGame", (message: any) => {
-      try {
-        const data =
-          typeof message === "string" ? JSON.parse(message) : message;
-        if (data && data.GameId) {
-          const url = new URL(window.location.href);
-          url.searchParams.set("gameid", data.GameId);
-          history.pushState(null, "", url.toString());
-        }
-      } catch (err) {
-        console.error("Failed to handle SetPlayerGame: " + err);
-      }
-    });
-
-    connection.on("PublicVisible", (message: any) => {
-      try {
-        const data = JSON.parse(message);
-        cells = data.Cells;
-        score = data.Score;
-        status = data.Status;
-        console.log("Game Status: " + status);
-        gameId = data.GameId;
-
-        if (data.Status === 3) {
-          console.log("End of Game");
-        }
-      } catch (err) {
-        console.error("Failed to handle PublicVisible: " + err);
-      }
-    });
-
-    connection.on("PlayerStatus", async (message: any) => {
-      console.log("PlayerStatus: " + message);
-      const urlParams = new URLSearchParams(window.location.search);
-      const gameId = urlParams.get("gameid") || "";
-      console.log("GameId from query string: " + gameId);
-
-      if (gameId === "") {
-        console.log("No gameId found in query string, starting new game");
-        await startNewGame();
-      }
-    });
-
-    try {
-      await connection.start();
-      connectionStatus = "connected";
-
-      const urlParams = new URLSearchParams(window.location.search);
-      const gameId = urlParams.get("gameid") || "";
-      console.log("GameId from query string: " + gameId);
-
-      try {
-        await connection.invoke("CheckPlayerStatus", gameId);
-        console.log("CheckPlayerStatus called with gameId: " + gameId);
-      } catch (err) {
-        console.error("Failed to call CheckPlayerStatus: " + err);
-      }
-    } catch (err) {
-      connectionStatus = "error";
-      console.error("SignalR connection error: " + err);
-    }
-  }
-
-  async function startNewGame(): Promise<void> {
-    if (connectionStatus === "connected" && connection) {
-      try {
-        await connection.invoke("StartNew");
-      } catch (err) {
-        console.error("Failed to start new game:", err);
-      }
-    }
-  }
-
-  // Game board functions
-  function drawGrid(grid: HTMLDivElement) {
-    for (let x = 0; x < gridWidth; x++) {
-      for (let y = 0; y < gridWidth; y++) {
-        grid.appendChild(addCell(0, 0, x, y, cellWidth, true, false));
-      }
-    }
-  }
-
-  function handleTouchStart(e: TouchEvent) {
-    if (e.touches.length === 1) {
-      touchStartX = e.touches[0].clientX;
-      touchStartY = e.touches[0].clientY;
-    }
-  }
-
-  function handleTouchEnd(e: TouchEvent) {
-    if (e.changedTouches.length === 1) {
-      e.preventDefault();
-      touchEndX = e.changedTouches[0].clientX;
-      touchEndY = e.changedTouches[0].clientY;
-      handleSwipe();
-    }
-  }
-
-  function handleSwipe() {
-    const dx = touchEndX - touchStartX;
-    const dy = touchEndY - touchStartY;
-    const absDx = Math.abs(dx);
-    const absDy = Math.abs(dy);
-    const minDistance = 30;
-
-    if (absDx < minDistance && absDy < minDistance) return;
-
-    let direction = -1;
-    if (absDx > absDy) {
-      direction = dx > 0 ? 3 : 2; // Right : Left
-    } else {
-      direction = dy > 0 ? 1 : 0; // Down : Up
-    }
-
-    if (direction !== -1 && connection) {
-      connection.invoke("Move", gameId, direction).catch(function (err: Error) {
-        console.log(
-          "Could not invoke method [Move] on signalR connection." +
-            err.toString(),
-        );
-      });
-    }
-  }
-
-  function tryAgain() {
-    if (connection) {
-      connection.invoke("StartNew").catch(function (err: Error) {
-        console.error("Failed to start new game:", err);
-      });
-    }
-  }
-
-  function simulateGameEnd() {
-    status = 3;
-  }
-
+  // Helper functions
   function toPixels(input: number): number {
     return input * (cellWidth + cellMargin) + cellMargin;
-  }
-
-  function moveCell(element: HTMLElement, x: number, y: number): void {
-    element.style.top = toPixels(y) + "px";
-    element.style.left = toPixels(x) + "px";
-  }
-
-  function getCellId(id: string): string {
-    return `cellId-${id}`;
   }
 
   function getDirectionFromKey(key: string): number {
@@ -210,200 +81,389 @@
     }
   }
 
+  // SignalR connection and handlers
+  async function connectToSignalR(): Promise<void> {
+    try {
+      // Set up event handlers
+      signalRConnection.on("SetPlayerGame", (message: any) => {
+        try {
+          const data =
+            typeof message === "string" ? JSON.parse(message) : message;
+          if (data && data.GameId) {
+            const url = new URL(window.location.href);
+            url.searchParams.set("gameid", data.GameId);
+            history.pushState(null, "", url.toString());
+          }
+        } catch (err) {
+          console.error("Failed to handle SetPlayerGame:", err);
+        }
+      });
+
+      signalRConnection.on("PublicVisible", (message: any) => {
+        try {
+          const data = JSON.parse(message);
+          cells = data.Cells || [];
+          score = data.Score || 0;
+          status = data.Status || 0;
+          gameId = data.GameId || "";
+
+          if (data.Status === 3) {
+            console.log("Game Over");
+          }
+        } catch (err) {
+          console.error("Failed to handle PublicVisible:", err);
+        }
+      });
+
+      signalRConnection.on("PlayerStatus", async (message: any) => {
+        console.log("PlayerStatus:", message);
+        const urlParams = new URLSearchParams(window.location.search);
+        const currentGameId = urlParams.get("gameid") || "";
+
+        if (currentGameId === "") {
+          console.log("Starting new game");
+          await startNewGame();
+        }
+      });
+
+      // Connect to hub
+      await signalRConnection.connect();
+
+      const urlParams = new URLSearchParams(window.location.search);
+      const currentGameId = urlParams.get("gameid") || "";
+
+      await signalRConnection.invoke("CheckPlayerStatus", currentGameId);
+    } catch (err) {
+      console.error("SignalR connection error:", err);
+    }
+  }
+
+  async function startNewGame(): Promise<void> {
+    if (connectionStatus === "connected" && signalRConnection.connection) {
+      try {
+        await signalRConnection.invoke("StartNew");
+      } catch (err) {
+        console.error("Failed to start new game:", err);
+      }
+    }
+  }
+
+  function tryAgain() {
+    startNewGame();
+  }
+
+  // Input handlers
+  function handleTouchStart(e: TouchEvent) {
+    if (e.touches.length === 1) {
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+    }
+  }
+
+  function handleTouchEnd(e: TouchEvent) {
+    if (e.changedTouches.length === 1) {
+      e.preventDefault();
+      const touchEndX = e.changedTouches[0].clientX;
+      const touchEndY = e.changedTouches[0].clientY;
+      handleSwipe(touchEndX - touchStartX, touchEndY - touchStartY);
+    }
+  }
+
+  function handleSwipe(dx: number, dy: number) {
+    const absDx = Math.abs(dx);
+    const absDy = Math.abs(dy);
+    const minDistance = 30;
+
+    if (absDx < minDistance && absDy < minDistance) return;
+
+    let direction = -1;
+    if (absDx > absDy) {
+      direction = dx > 0 ? 3 : 2; // Right : Left
+    } else {
+      direction = dy > 0 ? 1 : 0; // Down : Up
+    }
+
+    if (direction !== -1) {
+      sendMove(direction);
+    }
+  }
+
   function keydown(e: KeyboardEvent) {
-    if (e.repeat) return;
-    if (animLocked) return;
+    if (e.repeat || animLocked) return;
 
     if (
-      e.key === "ArrowUp" ||
-      e.key === "ArrowDown" ||
-      e.key === "ArrowLeft" ||
-      e.key === "ArrowRight" ||
-      e.key === "w" ||
-      e.key === "a" ||
-      e.key === "s" ||
-      e.key === "d"
+      ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "w", "a", "s", "d"].includes(e.key)
     ) {
       e.preventDefault();
-      const decodedKey = getDirectionFromKey(e.key);
-
-      if (decodedKey !== -1 && connection) {
-        connection.invoke("Move", gameId, decodedKey).catch(function (
-          err: Error,
-        ) {
-          console.log(
-            "Could not invoke method [Move] on signalR connection." +
-              err.toString(),
-          );
-        });
+      const direction = getDirectionFromKey(e.key);
+      if (direction !== -1) {
+        sendMove(direction);
       }
     }
   }
 
-  function addCell(
-    id: number,
-    value: number,
-    x: number,
-    y: number,
-    width: number,
-    isBase: boolean,
-    isMerged: boolean,
-  ): HTMLDivElement {
-    const node = document.createElement("div");
-    node.id = getCellId(id.toString());
-    node.classList.add("cell");
-    node.classList.add(`cell-${value}`);
-
-    if (!isMerged) {
-      node.classList.add("newCell");
+  async function sendMove(direction: number) {
+    if (signalRConnection.connection && gameId) {
+      try {
+        await signalRConnection.invoke("Move", gameId, direction);
+      } catch (err) {
+        console.error("Move failed:", err);
+      }
     }
-
-    if (value !== 0) {
-      node.innerText = value.toString();
-    }
-
-    node.style.zIndex = isBase ? "0" : id.toString();
-    node.style.top = toPixels(y) + "px";
-    node.style.left = toPixels(x) + "px";
-    node.style.width = width + "px";
-    node.style.height = width + "px";
-
-    return node;
   }
 
-  function drawCells() {
-    const grid = document.getElementById("grid");
-
-    if (cells.length === 0) {
-      console.log("drawCells: No cells to draw");
-      return;
-    }
-
-    if (!grid) {
-      console.error("Grid element not found");
-      return;
-    }
-
-    cells.forEach((cell: any) => {
-      const cellElement = document.getElementById(getCellId(cell.Id));
-
-      if (cellElement) {
-        moveCell(cellElement, cell.Point.X, cell.Point.Y);
-      } else {
-        setTimeout(function () {
-          const cellElement = addCell(
-            cell.Id,
-            cell.Value,
-            cell.Point.X,
-            cell.Point.Y,
-            cellWidth,
-            false,
-            cell.Merged,
-          );
-          grid.appendChild(cellElement);
-
-          if (!cell.Merged) {
-            setTimeout(function () {
-              cellElement.classList.remove("newCell");
-            }, animationNewCellRevertMs);
-          }
-        }, animationNewCellDelayMs);
-      }
-
-      if (cell.Destroy === true) {
-        const cellElement = document.getElementById(getCellId(cell.Id));
-        if (cellElement) {
-          cellElement.style.opacity = "0";
-          setTimeout(function () {
-            grid.removeChild(cellElement);
-          }, animationRemoveCellDelayMs);
-        }
-      }
-      if (cell.New || cell.Destroy) {
-        return;
-      }
-    });
-  }
-
-  // Update Logic
+  // Animation lockout effect
   $effect(() => {
-    animLocked = true;
-    setTimeout(() => {
-      animLocked = false;
-    }, animationLockoutDurationMs);
-    drawCells();
+    if (cells.length > 0) {
+      animLocked = true;
+      setTimeout(() => {
+        animLocked = false;
+      }, animationLockoutDurationMs);
+    }
   });
+
+  // Custom transition for new cells with pop-in effect
+  function popIn(node: HTMLElement, { delay = 0 }: { delay?: number }) {
+    return {
+      delay,
+      duration: 300,
+      easing: quintOut,
+      css: (t: number) => `
+        transform: scale(${t});
+        opacity: ${t};
+      `,
+    };
+  }
 
   onMount(() => {
     setTimeout(() => {
       connectToSignalR();
     }, 200);
-
-    // Initialize grid when cells are available
-    const initGrid = () => {
-      let grid = document.getElementById("grid") as HTMLDivElement | null;
-      if (!grid) {
-        setTimeout(initGrid, 100);
-        return;
-      }
-
-      let gridWidthPX: number = 4 * cellWidth + 5 * cellMargin + 5;
-      grid.style.height = gridWidthPX + "px";
-      grid.style.width = gridWidthPX + "px";
-      drawGrid(grid);
-      console.log("Board component mounted with grid size:", gridWidthPX);
-    };
-
-    setTimeout(initGrid, 300);
   });
 </script>
 
 <svelte:window onkeydown={keydown} />
 
 <main class="game-window">
-  <div
-    class="status-bar"
-    class:connected={connectionStatus === "connected"}
-    class:reconnecting={connectionStatus === "reconnecting"}
-    class:disconnected={connectionStatus === "disconnected" ||
-      connectionStatus === "error"}
-  ></div>
+  <StatusBar {connectionStatus} />
 
   {#if status === 0}
-    <div>Loading</div>
-  {:else}
-    <!-- Show game board if available -->
-    {#if cells.length > 0}
+    <div class="loading">Loading...</div>
+  {:else if cells.length > 0}
+    <div
+      class="game-board"
+      ontouchstart={handleTouchStart}
+      ontouchend={handleTouchEnd}
+    >
+      <div class="score">Score: {score}</div>
+
       <div
-        class="game-board"
-        ontouchstart={handleTouchStart}
-        ontouchend={handleTouchEnd}
+        class="grid"
+        style="width: {gridSizePx}px; height: {gridSizePx}px;"
+        class:locked={animLocked}
+        class:unlocked={!animLocked}
+        class:game-over={status === 3}
       >
-        <div class="score">Score: {score}</div>
-        <div class="status">Status: {status}</div>
-        <div
-          class="grid"
-          id="grid"
-          class:locked={animLocked}
-          class:unlocked={!animLocked}
-          class:game-over={status === 3}
-        ></div>
+        <!-- Base grid cells (always visible) -->
+        {#each Array(gridWidth * gridWidth) as _, i}
+          <div
+            class="cell cell-base"
+            style="
+              left: {toPixels(i % gridWidth)}px;
+              top: {toPixels(Math.floor(i / gridWidth))}px;
+              width: {cellWidth}px;
+              height: {cellWidth}px;
+            "
+          ></div>
+        {/each}
 
-        {#if status === 3}
-          <div class="game-over-message">Game Over</div>
-          <button class="play-again-button" onclick={tryAgain}
-            >Play Again</button
+        <!-- Active game cells (reactive) -->
+        {#each cells.filter((c) => !c.Destroy) as cell (cell.Id)}
+          <div
+            class="cell cell-{cell.Value}"
+            class:new-cell={cell.New && !cell.Merged}
+            class:merged-cell={cell.Merged}
+            style="
+              left: {toPixels(cell.Point.X)}px;
+              top: {toPixels(cell.Point.Y)}px;
+              width: {cellWidth}px;
+              height: {cellWidth}px;
+              z-index: {cell.Id};
+            "
+            in:popIn={{ delay: 100 }}
+            out:fade={{ duration: 50 }}
           >
-        {/if}
-
-        <button class="debug-button" onclick={simulateGameEnd}
-          >Simulate Game End</button
-        >
+            {cell.Value}
+          </div>
+        {/each}
       </div>
-    {/if}
+
+      {#if status === 3}
+        <div class="game-over-overlay">
+          <div class="game-over-message">Game Over</div>
+          <button class="play-again-button" onclick={tryAgain}>
+            Play Again
+          </button>
+        </div>
+      {/if}
+    </div>
   {/if}
 </main>
 
 <style>
   @import "./Twenty48.css";
+
+  .loading {
+    text-align: center;
+    padding: 2rem;
+    font-size: 1.2rem;
+  }
+
+  .grid {
+    position: relative;
+    background-color: #bbada0;
+    border-radius: 6px;
+    padding: 5px;
+  }
+
+  .cell {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 2rem;
+    border-radius: 3px;
+    transition: all 0.15s ease-in-out;
+  }
+
+  .cell-base {
+    background-color: rgba(238, 228, 218, 0.35);
+    z-index: 0;
+  }
+
+  /* New cell animation */
+  .new-cell {
+    animation: pop-in 0.3s ease-out;
+  }
+
+  @keyframes pop-in {
+    0% {
+      transform: scale(0);
+    }
+    50% {
+      transform: scale(1.1);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+
+  /* Merged cell pulse */
+  .merged-cell {
+    animation: pulse 0.2s ease-in-out;
+  }
+
+  @keyframes pulse {
+    0%,
+    100% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.05);
+    }
+  }
+
+  /* Cell colors */
+  .cell-2 {
+    background-color: #eee4da;
+    color: #776e65;
+  }
+  .cell-4 {
+    background-color: #ede0c8;
+    color: #776e65;
+  }
+  .cell-8 {
+    background-color: #f2b179;
+    color: #f9f6f2;
+  }
+  .cell-16 {
+    background-color: #f59563;
+    color: #f9f6f2;
+  }
+  .cell-32 {
+    background-color: #f67c5f;
+    color: #f9f6f2;
+  }
+  .cell-64 {
+    background-color: #f65e3b;
+    color: #f9f6f2;
+  }
+  .cell-128 {
+    background-color: #edcf72;
+    color: #f9f6f2;
+    font-size: 1.75rem;
+  }
+  .cell-256 {
+    background-color: #edcc61;
+    color: #f9f6f2;
+    font-size: 1.75rem;
+  }
+  .cell-512 {
+    background-color: #edc850;
+    color: #f9f6f2;
+    font-size: 1.75rem;
+  }
+  .cell-1024 {
+    background-color: #edc53f;
+    color: #f9f6f2;
+    font-size: 1.5rem;
+  }
+  .cell-2048 {
+    background-color: #edc22e;
+    color: #f9f6f2;
+    font-size: 1.5rem;
+  }
+  .cell-4096 {
+    background-color: #3c3a32;
+    color: #f9f6f2;
+    font-size: 1.25rem;
+  }
+
+  .game-over-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(238, 228, 218, 0.73);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+  }
+
+  .game-over-message {
+    font-size: 3rem;
+    font-weight: bold;
+    color: #776e65;
+    margin-bottom: 1rem;
+  }
+
+  .play-again-button {
+    background-color: #8f7a66;
+    color: #f9f6f2;
+    border: none;
+    padding: 1rem 2rem;
+    font-size: 1.2rem;
+    font-weight: bold;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+
+  .play-again-button:hover {
+    background-color: #9f8a76;
+  }
 </style>
