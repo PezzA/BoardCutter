@@ -485,3 +485,8 @@ $RECYCLE.BIN/
 
 # ignore any ts compilation folders
 dist/
+
+# Claude Code user-specific files
+.claude/*
+!.claude/commands/
+!.claude/settings.json
